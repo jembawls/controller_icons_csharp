@@ -115,7 +115,10 @@ public partial class ControllerIcons : Node
 
 	public void Cleanup()
 	{
-        _mapper.Free();
+        if( _mapper != null && !_mapper.IsQueuedForDeletion() )
+        {
+            _mapper.Free();
+        }
     }
 
 	public void ParseInputActions()
@@ -124,7 +127,7 @@ public partial class ControllerIcons : Node
 
         foreach( string key in _builtin_keys )
 		{
-            Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)ProjectSettings.GetSetting(key); //TODO: i dont like this
+            Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)ProjectSettings.GetSetting(key);
             if( data.Count > 1 && data.ContainsKey("events") && data["events"].GetType() == typeof( Godot.Collections.Array ))
 			{
                 _add_custom_input_action(key.TrimPrefix("input/"), data);

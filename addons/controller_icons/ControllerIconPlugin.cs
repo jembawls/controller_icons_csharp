@@ -31,15 +31,5 @@ public partial class ControllerIconPlugin : EditorPlugin
 	public override void _ExitTree()
 	{
         RemoveInspectorPlugin(inspector_plugin);
-
-        if( ControllerIcons.CI != null )
-        {
-            ControllerIcons.CI.Cleanup();
-
-            if( !ControllerIcons.CI.IsQueuedForDeletion() )
-            {
-                ControllerIcons.CI.QueueFree();
-            }
-        }
     }
 }
