@@ -1,5 +1,5 @@
 # Controller Icons C#
-A C# port of rsubtil's Controller Icons plugin for Godot. It provides icons for all major controllers as well as automatic icon swapping system based on player input. The original plugin can be found here: https://github.com/rsubtil/controller_icons
+A C# port of rsubtil's Controller Icons plugin for Godot. It provides icons for all major controllers as well as automatic icon swapping system based on player input. The original plugin + more detailed information can be found here: https://github.com/rsubtil/controller_icons
 
 Full credit to [Ricardo Subtil (rsubtil)](https://github.com/rsubtil) for putting together this incredible plugin.
 
