@@ -29,7 +29,7 @@ Feel free to let me know, but I also do intend on testing this myself someday an
 
 The addon is licensed under the MIT license. Full details at [LICENSE](LICENSE). Original License at [ORIGINAL LICENSE](ORIGINAL_LICENSE).
 
-Additional credits (taken from rsubtil's repo):
+### Additional credits (taken from rsubtil's repo):
 The controller assets are [Xelu's FREE Controllers & Keyboard PROMPTS](https://thoseawesomeguys.com/prompts/), made by Nicolae (XELU) Berbece and under Creative Commons 0 _(CC0)_. Some extra icons were created and contributed to this addon, also on the same CC0 license:
 
 - [@TacticalLaptopBag](https://github.com/TacticalLaptopBag): Apostrophe, backtick, comma, equals, forward slash and period keys.
