@@ -12,7 +12,7 @@ Download this repository and copy the `addons` folder to your project root direc
 
 Then activate **Controller Icons** in your project plugins.
 
-## Why make this plugin?
+## Why make this port?
 Godot supports GDScript plugins with C# projects. However, there was an unfortunate intermittent issue when using this plugin that caused the plugin to very rarely crash on game startup. Issue: https://github.com/rsubtil/controller_icons/issues/95
 
 It appears that this may be an engine-related issue. So I ported this plugin to ensure this crash cannot happen in my C# project. However, that doesn't mean my code is bug free 😂
