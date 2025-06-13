@@ -116,7 +116,7 @@ public partial class InputActionSelector : Panel
 
         // Map with all input actions
         root = n_tree.CreateItem();
-        foreach( string data in CI._custom_input_actions.Keys ) //TODO: Confirm if original code was indeed iterating over keys
+        foreach( string data in CI._custom_input_actions.Keys )
 		{
 			ControllerIcons_Item child = new(n_tree, root, data, default_actions.Contains(data) );
 			items.Add(child);
