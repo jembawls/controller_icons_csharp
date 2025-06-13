@@ -128,9 +128,11 @@ public partial class ControllerIcons : Node
         foreach( string key in _builtin_keys )
 		{
             Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)ProjectSettings.GetSetting(key);
-            if( data.Count > 1 && data.ContainsKey("events") && data["events"].GetType() == typeof( Godot.Collections.Array ))
+            if( data.Count > 1 && 
+                data.ContainsKey("events") && 
+                data["events"].AsGodotArray<InputEvent>() is Godot.Collections.Array<InputEvent> events )
 			{
-                _add_custom_input_action(key.TrimPrefix("input/"), data);
+                _add_custom_input_action(key.TrimPrefix("input/"), events);
             }
 		}
 
@@ -150,7 +152,7 @@ public partial class ControllerIcons : Node
             foreach( string input_action in proj_file.GetSectionKeys("input") )
 			{
                 Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)proj_file.GetValue("input", input_action);
-                _add_custom_input_action(input_action, data);
+                _add_custom_input_action(input_action, data["events"].AsGodotArray<InputEvent>());
 			}
         }
 	}
@@ -283,9 +285,9 @@ public partial class ControllerIcons : Node
         _cached_callables_lock.Unlock();
     }
 
-	private void _add_custom_input_action( string input_action , Godot.Collections.Dictionary data )
+	private void _add_custom_input_action( string input_action , Godot.Collections.Array<InputEvent> events )
 	{
-        _custom_input_actions[input_action] = (Godot.Collections.Array<InputEvent>)data["events"];
+        _custom_input_actions[input_action] = events;
     }
 
 	private void refresh()
@@ -304,7 +306,7 @@ public partial class ControllerIcons : Node
         return _mapper._get_joypad_type(controller, _settings.joypad_fallback);
     }
 
-	public Texture2D parse_path( string path, InputType? input_type = InputType.NONE, int last_controller = int.MinValue )
+	public Texture2D parse_path( string path, InputType? input_type = InputType.NONE, int last_controller = int.MinValue, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE )
 	{		
 		if( input_type == null )
 		{
@@ -321,7 +323,7 @@ public partial class ControllerIcons : Node
             last_controller = _last_controller;
         }
 
-        List<string> root_paths = _expand_path(path, input_type.Value, last_controller);
+        List<string> root_paths = _expand_path(path, input_type.Value, last_controller, forced_controller_icon_style);
         foreach( string root_path in root_paths )
 		{
 			if( _load_icon(root_path) != Error.Ok )
@@ -472,7 +474,7 @@ public partial class ControllerIcons : Node
 		else
 			events = InputMap.ActionGetEvents(path);
 
-		InputEvent fallback = null;
+		List<InputEvent> fallbacks = [];
 		foreach( InputEvent inputEvent in events )
 		{
 			if( !IsInstanceValid(inputEvent) ) continue;
@@ -494,17 +496,19 @@ public partial class ControllerIcons : Node
 						if( inputEvent.Device == controller )
 							return inputEvent;
 						// Otherwise use the first "all devices" mapping.
-						else if( fallback == null && inputEvent.Device < 0 )
-							fallback = inputEvent;
-					}
+						if( inputEvent.Device < 0 ) // All-device event
+							fallbacks.Insert(0, inputEvent );
+                        else
+                            fallbacks.Add(inputEvent);
+                    }
                 break;
             }
 		}
 
-		return fallback;
+		return fallbacks.Count > 0 ? fallbacks[0] : null;
     }
 
-	private List<string> _expand_path(string path, InputType input_type, int controller)
+	private List<string> _expand_path(string path, InputType input_type, int controller, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE)
 	{
 		List<string> paths = [];
 		List<string> base_paths = [
@@ -515,7 +519,7 @@ public partial class ControllerIcons : Node
 		{
 			if( string.IsNullOrWhiteSpace(base_path) )
 				continue;
-			string asset_path = base_path + _convert_path_to_asset_file(path, input_type, controller);
+			string asset_path = base_path + _convert_path_to_asset_file(path, input_type, controller, forced_controller_icon_style);
 
 			paths.Add(asset_path + "." + _base_extension);
 		}
@@ -523,17 +527,17 @@ public partial class ControllerIcons : Node
         return paths;
     }
 
-	private string _convert_path_to_asset_file( string path, InputType input_type, int controller )
+	private string _convert_path_to_asset_file( string path, InputType input_type, int controller, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE )
 	{
 		switch( (PathType)get_path_type(path) )
 		{
 			case PathType.INPUT_ACTION:
                 InputEvent e = get_matching_event(path, input_type, controller);
                 if( e != null)
-                    return _convert_event_to_path(e);
+                    return _convert_event_to_path(e, controller, forced_controller_icon_style);
                 return path;
 			case PathType.JOYPAD_PATH:
-				return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback);
+				return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback, forced_controller_icon_style);
             case PathType.SPECIFIC_PATH:
 			default:
 				return path;
@@ -573,8 +577,13 @@ public partial class ControllerIcons : Node
         };
     }
 
-	private string _convert_event_to_path( InputEvent e )
+	private string _convert_event_to_path( InputEvent e, int controller = int.MinValue, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE )
 	{
+        if( controller == int.MinValue )
+        {
+            controller = _last_controller;
+        }
+
 		if( e is InputEventKey keyEvent )
 		{
             // If this is a physical key, convert to localized scancode
@@ -585,9 +594,9 @@ public partial class ControllerIcons : Node
 		else if( e is InputEventMouseButton mouseEvent )
 			return _convert_mouse_button_to_path(mouseEvent.ButtonIndex);
 		else if( e is InputEventJoypadButton joypadButtonEvent )
-			return _convert_joypad_button_to_path(joypadButtonEvent.ButtonIndex, joypadButtonEvent.Device);
+			return _convert_joypad_button_to_path(joypadButtonEvent.ButtonIndex, controller, forced_controller_icon_style);
 		else if( e is InputEventJoypadMotion joypadMotionEvent )
-			return _convert_joypad_motion_to_path(joypadMotionEvent.Axis, joypadMotionEvent.Device);
+			return _convert_joypad_motion_to_path(joypadMotionEvent.Axis, controller, forced_controller_icon_style);
 
 		return "";
     }
@@ -720,7 +729,7 @@ public partial class ControllerIcons : Node
         };
     }
 
-	private string _convert_joypad_button_to_path( JoyButton button , int controller )
+	private string _convert_joypad_button_to_path( JoyButton button , int controller, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE )
 	{
         string path;
         switch( button )
@@ -777,10 +786,10 @@ public partial class ControllerIcons : Node
         		return "";
 		};
 
-        return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback);
+        return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback, forced_controller_icon_style);
     }
 
-    private string _convert_joypad_motion_to_path(JoyAxis axis, int controller)
+    private string _convert_joypad_motion_to_path(JoyAxis axis, int controller, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE)
     {
         string path;
 		switch( axis )
@@ -803,7 +812,7 @@ public partial class ControllerIcons : Node
 				return "";
 		}
 
-        return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback);
+        return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback, forced_controller_icon_style);
     }
 
     private Error _load_icon( string path )

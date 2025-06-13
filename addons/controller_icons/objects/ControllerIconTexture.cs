@@ -95,6 +95,28 @@ public partial class ControllerIconTexture : Texture2D
 	}
     private ShowMode _show_mode = ShowMode.ANY;
 
+    // Forces the icon to show a specific controller style, regardless of the
+    // currently used controller type.
+    //[br][br]
+    // This will override force_device if set to a value other than NONE.
+    //[br][br]
+    // This is only relevant for paths using input actions, and has no effect on
+    // other scenarios.
+    [Export]
+    public ControllerSettings.Devices force_controller_icon_style { 
+		get 
+		{ 
+			return _force_controller_icon_style; 
+		}
+
+        set 
+		{
+			_force_controller_icon_style = value;
+            _load_texture_path();
+		} 
+	}
+    private ControllerSettings.Devices _force_controller_icon_style = ControllerSettings.Devices.NONE;
+    
     // Forces the icon to show either the keyboard/mouse or controller icon,
     // regardless of the currently used input method.
     //[br][br]
@@ -114,6 +136,44 @@ public partial class ControllerIconTexture : Texture2D
 		} 
 	}
     private InputType _force_type = InputType.NONE;
+
+    public enum ForceDevice {
+        DEVICE_0,
+        DEVICE_1,
+        DEVICE_2,
+        DEVICE_3,
+        DEVICE_4,
+        DEVICE_5,
+        DEVICE_6,
+        DEVICE_7,
+        DEVICE_8,
+        DEVICE_9,
+        DEVICE_10,
+        DEVICE_11,
+        DEVICE_12,
+        DEVICE_13,
+        DEVICE_14,
+        DEVICE_15,
+        ANY // No device will be forced
+    }
+
+    // Forces the icon to use the textures for the device connected at the specified index.
+    // For example, if a PlayStation 5 controller is connected at device_index 0,
+    // the icon will always show PlayStation 5 textures.
+    [Export]
+    public ForceDevice force_device { 
+		get 
+		{ 
+			return _force_device; 
+		}
+
+        set 
+		{
+			_force_device = value;
+            _load_texture_path();
+		} 
+	}
+    private ForceDevice _force_device = ForceDevice.ANY;
 
 	[ExportSubgroup("Text Rendering")]
     // Custom LabelSettings. If set, overrides the addon's global label settings.
@@ -252,8 +312,8 @@ public partial class ControllerIconTexture : Texture2D
                 InputEvent e = CI.get_matching_event(path, input_type);
                 textures.AddRange(CI.parse_event_modifiers(e));				
 			}
-
-			Texture2D tex = CI.parse_path(path, input_type);
+            int target_device = force_device != ForceDevice.ANY ? (int)force_device : CI._last_controller;
+            Texture2D tex = CI.parse_path(path, input_type, target_device, force_controller_icon_style);
 			if( tex != null )
 				textures.Add(tex);
 		}

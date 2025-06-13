@@ -6,6 +6,7 @@ public partial class ControllerSettings : Resource
 {
     public enum Devices
     {
+        NONE = -1,
         LUNA,
         OUYA,
         PS3,

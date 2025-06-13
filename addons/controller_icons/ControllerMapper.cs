@@ -5,9 +5,9 @@ using System.Linq;
 [Tool]
 public partial class ControllerMapper : Node
 {
-    public string _convert_joypad_path( string path, int device, ControllerSettings.Devices fallback )
+    public string _convert_joypad_path( string path, int device, ControllerSettings.Devices fallback, ControllerSettings.Devices force_controller_icon_style = ControllerSettings.Devices.NONE )
 	{
-        return _get_joypad_type(device, fallback) switch
+        return _get_joypad_type(device, fallback, force_controller_icon_style) switch
         {
             ControllerSettings.Devices.LUNA => _convert_joypad_to_luna(path),
             ControllerSettings.Devices.PS3 => _convert_joypad_to_ps3(path),
@@ -26,8 +26,13 @@ public partial class ControllerMapper : Node
         };
     }
 
-	public ControllerSettings.Devices _get_joypad_type( int device, ControllerSettings.Devices fallback)
+	public ControllerSettings.Devices _get_joypad_type( int device, ControllerSettings.Devices fallback, ControllerSettings.Devices force_controller_icon_style = ControllerSettings.Devices.NONE)
 	{
+		if( force_controller_icon_style != ControllerSettings.Devices.NONE )
+		{
+            return force_controller_icon_style;
+        }
+
 		Godot.Collections.Array<int> available = Input.GetConnectedJoypads();
 		if( available.Count == 0 )
 		{
