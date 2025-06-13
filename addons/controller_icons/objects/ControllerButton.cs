@@ -27,17 +27,14 @@ public partial class ControllerButton : Button
             _path = value;
 			if( IsInsideTree() )
 			{
-				if( force_type > 0 )
-                    Icon = CI.parse_path(path, force_type - 1);
-                else
-                    Icon = CI.parse_path(path);
+                Icon = CI.parse_path(path, force_type);
             }
         }
     }
     private string _path = "";
 
-	[Export(PropertyHint.Flags, "Both,Keyboard/Mouse,Controller")]
-	public int show_only {
+	[Export]
+	public ShowMode show_only {
 		get 
 		{
             return _show_only;
@@ -49,9 +46,9 @@ public partial class ControllerButton : Button
             _on_input_type_changed(CI._last_input_type, CI._last_controller);
         }
 	}
-    private int _show_only = 0;
-		
-	[Export(PropertyHint.Flags, "None,Keyboard/Mouse,Controller")]
+    private ShowMode _show_only = ShowMode.ANY;
+
+	[Export]
 	public InputType force_type
 	{
 		get
@@ -65,7 +62,7 @@ public partial class ControllerButton : Button
             _on_input_type_changed(CI._last_input_type, CI._last_controller);
         }
 	}
-    private InputType _force_type = 0;
+    private InputType _force_type = InputType.NONE;
 
 	public override void _Ready()
 	{
@@ -73,26 +70,22 @@ public partial class ControllerButton : Button
         this.path = path;
     }
 
-	private void _on_input_type_changed( InputType input_type, int controller)
+	public void _on_input_type_changed( InputType input_type, int controller )
 	{
-		if( show_only == 0 || 
-			(show_only == 1 && input_type == InputType.KEYBOARD_MOUSE) ||
-			(show_only == 2 && input_type == InputType.CONTROLLER) )
+		if( show_only == ShowMode.ANY ||
+			(show_only == ShowMode.KEYBOARD_MOUSE && input_type == InputType.KEYBOARD_MOUSE) ||
+			(show_only == ShowMode.CONTROLLER && input_type == InputType.CONTROLLER))
 		{
+            Visible = true;
             this.path = path;
         }
 		else
-		{
-            Icon = null;
-        }
-	}
+            Visible = false;
+    }
 
 	private string get_tts_string()
 	{
-		if( force_type != InputType.NONE )
-			return CI.parse_path_to_tts(path, force_type - 1, CI._last_controller);
-        else
-			return CI.parse_path_to_tts(path);
-    }
+		return CI.parse_path_to_tts(path, force_type);
+    }	
 
 }

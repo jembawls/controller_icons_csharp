@@ -71,13 +71,6 @@ public partial class ControllerIconTexture : Texture2D
 	}
     private string _path = "";
 
-    public enum ShowMode
-    {
-        ANY, // Icon will be display on any input method.
-        KEYBOARD_MOUSE, // Icon will be display only when the keyboard/mouse is being used.
-        CONTROLLER // Icon will be display only when a controller is being used.
-    }
-
     // Show the icon only if a specific input method is being used. When hidden, 
     // the icon will not occupy have any space (no width and height).	
     [Export]

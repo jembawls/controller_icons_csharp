@@ -14,7 +14,6 @@ using static ControllerIcons;
 [Tool]
 public partial class ControllerSprite3D : Sprite3D
 {
-
     public override string[] _GetConfigurationWarnings()
     {
         return ["This node is deprecated, and will be removed in a future version.\n\nRemove this script and use the new ControllerIconTexture resource\nby setting it directly in Sprite3D's texture property."];
@@ -32,16 +31,14 @@ public partial class ControllerSprite3D : Sprite3D
 			_path = value;
 			if( IsInsideTree() )
 			{
-				if( force_type > 0 )
-					Texture = CI.parse_path(path, force_type - 1);
-                else
-					Texture = CI.parse_path(path);
+				Texture = CI.parse_path(path, force_type);
             }
 		} 
 	}
     private string _path = "";
-	[Export(PropertyHint.Flags, "Both,Keyboard/Mouse,Controller")]
-	public int show_only {
+
+	[Export]
+	public ShowMode show_only {
 		get 
 		{
             return _show_only;
@@ -53,9 +50,9 @@ public partial class ControllerSprite3D : Sprite3D
             _on_input_type_changed(CI._last_input_type, CI._last_controller);
         }
 	}
-    private int _show_only = 0;
+    private ShowMode _show_only = ShowMode.ANY;
 
-	[Export(PropertyHint.Flags, "None,Keyboard/Mouse,Controller")]
+	[Export]
 	public InputType force_type
 	{
 		get
@@ -69,7 +66,7 @@ public partial class ControllerSprite3D : Sprite3D
             _on_input_type_changed(CI._last_input_type, CI._last_controller);
         }
 	}
-    private InputType _force_type = 0;
+    private InputType _force_type = InputType.NONE;
 
 	public override void _Ready()
 	{
@@ -79,9 +76,9 @@ public partial class ControllerSprite3D : Sprite3D
 
 	public void _on_input_type_changed( InputType input_type, int controller )
 	{
-		if( show_only == 0 ||
-			(show_only == 1 && input_type == InputType.KEYBOARD_MOUSE) ||
-			(show_only == 2 && input_type == InputType.CONTROLLER))
+		if( show_only == ShowMode.ANY ||
+			(show_only == ShowMode.KEYBOARD_MOUSE && input_type == InputType.KEYBOARD_MOUSE) ||
+			(show_only == ShowMode.CONTROLLER && input_type == InputType.CONTROLLER))
 		{
             Visible = true;
             this.path = path;
@@ -92,9 +89,6 @@ public partial class ControllerSprite3D : Sprite3D
 
 	private string get_tts_string()
 	{
-		if( force_type != 0 )
-			return CI.parse_path_to_tts(path, force_type - 1);
-        else
-			return CI.parse_path_to_tts(path);
+		return CI.parse_path_to_tts(path, force_type);
     }	
 }

@@ -21,6 +21,13 @@ public partial class ControllerIcons : Node
 		SPECIFIC_PATH // The path is a specific path.
 	}
 
+    public enum ShowMode
+    {
+        ANY, // Icon will be display on any input method.
+        KEYBOARD_MOUSE, // Icon will be display only when the keyboard/mouse is being used.
+        CONTROLLER // Icon will be display only when a controller is being used.
+    }
+
     public static ControllerIcons CI { get; set; }
 
     private Godot.Collections.Dictionary<string, Texture2D> _cached_icons = [];
