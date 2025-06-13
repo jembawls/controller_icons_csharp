@@ -8,10 +8,10 @@ Please refer to [the original plugin](https://github.com/rsubtil/controller_icon
 
 *Note: The minimum Godot version is 4.1.2 (stable).*
 
-Step 1: Download this repository and copy the `addons` folder to your project root directory.
-Step 2a: Create a C# solution file if you haven't already (Project -> Tools -> C# -> Create C# Solution)
-Step 2b: Build your project (Alt+B by default - or click the little hammer on the top right, next to the play button)
-Step 3: Activate **Controller Icons** in your project plugins (Project -> Project Settings -> Plugins -> Click Enabled checkbox)
+**Step 1)** Download this repository and copy the `addons` folder to your project root directory.\
+**Step 2a)** Create a C# solution file if you haven't already (Project -> Tools -> C# -> Create C# Solution)\
+**Step 2b)** Build your project (Alt+B by default - or click the little hammer on the top right, next to the play button)\
+**Step 3)** Activate **Controller Icons** in your project plugins (Project -> Project Settings -> Plugins -> Click Enabled checkbox)
 
 You're good to go! Create a ControllerIconTexture, configure it to your needs, then use it wherever you need it. Done!
 
