@@ -117,15 +117,7 @@ public partial class ControllerIcons : Node
 
     public override void _ExitTree()
     {
-        Cleanup();
-    }
-
-	public void Cleanup()
-	{
-        if( _mapper != null && !_mapper.IsQueuedForDeletion() )
-        {
-            _mapper.Free();
-        }
+        _mapper = null;
     }
 
 	public void ParseInputActions()

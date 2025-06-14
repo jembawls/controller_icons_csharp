@@ -6,8 +6,9 @@
 [node name="ControllerIconPathSelectorPopup" type="ConfirmationDialog"]
 title = "Select an icon path"
 position = Vector2i(0, 36)
-size = Vector2i(866, 507)
+size = Vector2i(1300, 657)
 visible = true
+min_size = Vector2i(1300, 657)
 script = ExtResource("1_6s0ph")
 
 [node name="ControllerIconPathSelector" parent="." instance=ExtResource("2_gfs7t")]

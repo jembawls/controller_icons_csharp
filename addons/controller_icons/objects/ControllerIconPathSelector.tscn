@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" path="res://addons/controller_icons/objects/path_selection/joypad_path.tscn" id="3_6ffwr"]
 [ext_resource type="PackedScene" path="res://addons/controller_icons/objects/path_selection/specific_path.tscn" id="4_3ai5v"]
 
-[node name="ControllerIconPathSelector" type="PanelContainer" node_paths=PackedStringArray("n_tab_container", "n_input_action", "n_joypad_path", "n_specific_path")]
+[node name="ControllerIconPathSelector" type="PanelContainer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -15,7 +15,7 @@ script = ExtResource("1_0ucf4")
 
 [node name="TabContainer" type="TabContainer" parent="."]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(850, 450)
+custom_minimum_size = Vector2(1300, 657)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/side_margin = 0

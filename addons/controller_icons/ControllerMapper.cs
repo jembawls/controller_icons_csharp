@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 
 [Tool]
-public partial class ControllerMapper : Node
+public partial class ControllerMapper : RefCounted
 {
     public string _convert_joypad_path( string path, int device, ControllerSettings.Devices fallback, ControllerSettings.Devices force_controller_icon_style = ControllerSettings.Devices.NONE )
 	{
@@ -316,7 +316,7 @@ public partial class ControllerMapper : Node
 			case "rt":
 				return path.Replace("/rt", "/r2");
 			case "select":
-				return path.Replace("/select", "/square");
+				return path.Replace("/select", "/inventory");
 			case "start":
 				return path.Replace("/start", "/menu");
 			case "home":
