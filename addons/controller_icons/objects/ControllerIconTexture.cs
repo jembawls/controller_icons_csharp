@@ -371,13 +371,13 @@ public partial class ControllerIconTexture : Texture2D
 			{
 				if( texture != null )
 				{
-                    ret += texture.GetHeight();
+                    ret = Mathf.RoundToInt( Math.Max( ret, texture.GetHeight() ) );
                 }
 			}
 
-            if( _label_settings != null )
+            if( _label_settings != null && _textures.Count > 1 )
 			{
-                ret += Mathf.RoundToInt( Math.Max(0, _textures.Count - 1) * _text_size.Y );
+                ret = Mathf.RoundToInt( Math.Max(ret, _text_size.Y) );
             }
 
 			// If ret is 0, return a size of 2 to prevent triggering engine checks
@@ -472,23 +472,22 @@ public partial class ControllerIconTexture : Texture2D
             if( i != 0 )
 			{
                 // Draw text char '+'
-                Vector2 font_position = new Vector2(
+                Vector2 font_position = new(
                     position.X + (_text_size.X * width_ratio) / 2 - (_text_size.X / 2),
                     position.Y + (rect.Size.Y - _text_size.Y) / 2.0f
                 );
                 _draw_text(to_canvas_item, font_position, "+");
 
                 position += new Vector2(_text_size.X * width_ratio, 0);
-            }
-
+            } 
 
             Vector2 size = tex.GetSize() * new Vector2(width_ratio, height_ratio);
 
-            Vector2 src_rect_ratio = new Vector2(
+            Vector2 src_rect_ratio = new(
                 tex.GetWidth() / (float)_GetWidth(),
                 tex.GetHeight() / (float)_GetHeight()
             );
-            Rect2 tex_src_rect = new Rect2(
+            Rect2 tex_src_rect = new(
                 src_rect.Position * src_rect_ratio,
                 src_rect.Size * src_rect_ratio
             );
@@ -529,20 +528,23 @@ public partial class ControllerIconTexture : Texture2D
         if( _textures.Count > 1 )
 		{
             // Generate a viewport to draw the text
-            _helper_viewport = new SubViewport();
+            _helper_viewport = new SubViewport
+            {
+                // FIXME: We need a 3px margin for some reason
+                Size = (Vector2I)(_text_size + new Vector2(3, 0)),
 
-            // FIXME: We need a 3px margin for some reason
-            _helper_viewport.Size = (Vector2I)(_text_size + new Vector2(3, 0));
+                RenderTargetUpdateMode = SubViewport.UpdateMode.Once,
+                RenderTargetClearMode = SubViewport.ClearMode.Once,
+                TransparentBg = true
+            };
 
-            _helper_viewport.RenderTargetUpdateMode = SubViewport.UpdateMode.Once;
-            _helper_viewport.RenderTargetClearMode = SubViewport.ClearMode.Once;
-            _helper_viewport.TransparentBg = true;
+            Label label = new()
+            {
+                LabelSettings = _label_settings,
+                Text = "+",
 
-            Label label = new();
-            label.LabelSettings = _label_settings;
-            label.Text = "+";
-
-            label.Position = Vector2.Zero;
+                Position = Vector2.Zero
+            };
 
             _helper_viewport.AddChild(label);
 
@@ -555,9 +557,9 @@ public partial class ControllerIconTexture : Texture2D
             _helper_viewport.Free();
         }
 
-        Vector2I position = new Vector2I(0, 0);
+        Vector2I position = new(0, 0);
 
-        Image img = new Image();
+        Image img = new();
         for (int i = 0; i < _textures.Count; ++i )
 		{
 			if( _textures[i] == null ) continue;
@@ -566,7 +568,7 @@ public partial class ControllerIconTexture : Texture2D
 			{
 				// Draw text char '+'
 				Rect2I region = font_image.GetUsedRect();
-                Vector2I font_position = new Vector2I(
+                Vector2I font_position = new(
                     position.X,
                     position.Y + (GetHeight() - region.Size.Y) / 2
                 );
@@ -577,10 +579,7 @@ public partial class ControllerIconTexture : Texture2D
 
             Image texture_raw = _textures[i].GetImage();
             texture_raw.Decompress();
-            if( img == null )
-			{
-            	img = Image.CreateEmpty(_GetWidth(), _GetHeight(), true, texture_raw.GetFormat());
-			}
+            img ??= Image.CreateEmpty(_GetWidth(), _GetHeight(), true, texture_raw.GetFormat());
 
             img.BlitRect(texture_raw, new Rect2I(0, 0, texture_raw.GetWidth(), texture_raw.GetHeight()), position);
 
