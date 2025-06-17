@@ -1,4 +1,4 @@
-<img src="https://github.com/user-attachments/assets/a35304b7-66fc-4755-8127-71d578695662" width=15%>
+<img src="https://raw.githubusercontent.com/jembawls/controller_icons_csharp/refs/heads/main/icon.png" width=15%>
 
 # Controller Icons C#!
 
