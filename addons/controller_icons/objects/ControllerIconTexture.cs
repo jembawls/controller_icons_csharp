@@ -27,198 +27,198 @@ using static ControllerIcons;
 [GlobalClass, Icon("res://addons/controller_icons/objects/controller_texture_icon.svg")]
 public partial class ControllerIconTexture : Texture2D
 {
-    // A path describing the desired icon. This is a generic path that can be one
-    // of three different types:
-    // [br][br]
-    // [b]- Input Action[/b]: Specify the exact name of an existing input action. The
-    // icon will be swapped automatically depending on whether the keyboard/mouse or the
-    // controller is being used. When using a controller, it also changes according to
-    // the controller type.[br][br]
-    // [i]This is the recommended approach, as it will handle all input methods
-    // automatically, and supports any input remapping done at runtime[/i].
-    // [codeblock]
-    // # "Enter" on keyboard, "Cross" on Sony,
-    // # "A" on Xbox, "B" on Nintendo
-    // path = "ui_accept"
-    // [/codeblock]
-    // [b]- Joypad Path[/b]: Specify a generic joypad path resembling the layout of a
-    // Xbox 360 controller, starting with the [code]joypad/[/code] prefix. The icon will only
-    // display controller icons, but it will still change according to the controller type.
-    // [codeblock]
-    // # "Square" on Sony, "X" on Xbox, "Y" on Nintendo
-    // path = "joypad/x"
-    // [/codeblock]
-    // [b]- Specific Path[/b]: Specify a direct asset path from the addon assets.
-    // With this path type, there is no dynamic remapping, and the icon will always
-    // remain the same. The path to use is the path to an icon file, minus the base
-    // path and extension.
-    // [codeblock]
-    // # res://addons/controller_icons/assets/steam/gyro.png
-    // path = "steam/gyro"
-    // [/codeblock]
-    [Export]
-    public string path { 
+	// A path describing the desired icon. This is a generic path that can be one
+	// of three different types:
+	// [br][br]
+	// [b]- Input Action[/b]: Specify the exact name of an existing input action. The
+	// icon will be swapped automatically depending on whether the keyboard/mouse or the
+	// controller is being used. When using a controller, it also changes according to
+	// the controller type.[br][br]
+	// [i]This is the recommended approach, as it will handle all input methods
+	// automatically, and supports any input remapping done at runtime[/i].
+	// [codeblock]
+	// # "Enter" on keyboard, "Cross" on Sony,
+	// # "A" on Xbox, "B" on Nintendo
+	// path = "ui_accept"
+	// [/codeblock]
+	// [b]- Joypad Path[/b]: Specify a generic joypad path resembling the layout of a
+	// Xbox 360 controller, starting with the [code]joypad/[/code] prefix. The icon will only
+	// display controller icons, but it will still change according to the controller type.
+	// [codeblock]
+	// # "Square" on Sony, "X" on Xbox, "Y" on Nintendo
+	// path = "joypad/x"
+	// [/codeblock]
+	// [b]- Specific Path[/b]: Specify a direct asset path from the addon assets.
+	// With this path type, there is no dynamic remapping, and the icon will always
+	// remain the same. The path to use is the path to an icon file, minus the base
+	// path and extension.
+	// [codeblock]
+	// # res://addons/controller_icons/assets/steam/gyro.png
+	// path = "steam/gyro"
+	// [/codeblock]
+	[Export]
+	public string path { 
 		get 
 		{ 
 			return _path; 
 		}
 
-        set 
+		set 
 		{
 			_path = value;
-            LoadTexturePath();
+			LoadTexturePath();
 		} 
 	}
-    private string _path = "";
+	private string _path = "";
 
-    // Show the icon only if a specific input method is being used. When hidden, 
-    // the icon will not occupy have any space (no width and height).	
-    [Export]
-    public EShowMode show_mode { 
+	// Show the icon only if a specific input method is being used. When hidden, 
+	// the icon will not occupy have any space (no width and height).	
+	[Export]
+	public EShowMode show_mode { 
 		get 
 		{ 
 			return _show_mode; 
 		}
 
-        set 
+		set 
 		{
 			_show_mode = value;
-            LoadTexturePath();
+			LoadTexturePath();
 		} 
 	}
-    private EShowMode _show_mode = EShowMode.ANY;
+	private EShowMode _show_mode = EShowMode.ANY;
 
-    // Forces the icon to show a specific controller style, regardless of the
-    // currently used controller type.
-    //[br][br]
-    // This will override force_device if set to a value other than NONE.
-    //[br][br]
-    // This is only relevant for paths using input actions, and has no effect on
-    // other scenarios.
-    [Export]
-    public ControllerSettings.Devices force_controller_icon_style { 
+	// Forces the icon to show a specific controller style, regardless of the
+	// currently used controller type.
+	//[br][br]
+	// This will override force_device if set to a value other than NONE.
+	//[br][br]
+	// This is only relevant for paths using input actions, and has no effect on
+	// other scenarios.
+	[Export]
+	public ControllerSettings.Devices force_controller_icon_style { 
 		get 
 		{ 
 			return _force_controller_icon_style; 
 		}
 
-        set 
+		set 
 		{
 			_force_controller_icon_style = value;
-            LoadTexturePath();
+			LoadTexturePath();
 		} 
 	}
-    private ControllerSettings.Devices _force_controller_icon_style = ControllerSettings.Devices.NONE;
-    
-    // Forces the icon to show either the keyboard/mouse or controller icon,
-    // regardless of the currently used input method.
-    //[br][br]
-    // This is only relevant for paths using input actions, and has no effect on
-    // other scenarios.
-    [Export]
-    public EInputType force_type { 
+	private ControllerSettings.Devices _force_controller_icon_style = ControllerSettings.Devices.NONE;
+	
+	// Forces the icon to show either the keyboard/mouse or controller icon,
+	// regardless of the currently used input method.
+	//[br][br]
+	// This is only relevant for paths using input actions, and has no effect on
+	// other scenarios.
+	[Export]
+	public EInputType force_type { 
 		get 
 		{ 
 			return _force_type; 
 		}
 
-        set 
+		set 
 		{
 			_force_type = value;
-            LoadTexturePath();
+			LoadTexturePath();
 		} 
 	}
-    private EInputType _force_type = EInputType.NONE;
+	private EInputType _force_type = EInputType.NONE;
 
-    public enum EForceDevice {
-        DEVICE_0,
-        DEVICE_1,
-        DEVICE_2,
-        DEVICE_3,
-        DEVICE_4,
-        DEVICE_5,
-        DEVICE_6,
-        DEVICE_7,
-        DEVICE_8,
-        DEVICE_9,
-        DEVICE_10,
-        DEVICE_11,
-        DEVICE_12,
-        DEVICE_13,
-        DEVICE_14,
-        DEVICE_15,
-        ANY // No device will be forced
-    }
+	public enum EForceDevice {
+		DEVICE_0,
+		DEVICE_1,
+		DEVICE_2,
+		DEVICE_3,
+		DEVICE_4,
+		DEVICE_5,
+		DEVICE_6,
+		DEVICE_7,
+		DEVICE_8,
+		DEVICE_9,
+		DEVICE_10,
+		DEVICE_11,
+		DEVICE_12,
+		DEVICE_13,
+		DEVICE_14,
+		DEVICE_15,
+		ANY // No device will be forced
+	}
 
-    // Forces the icon to use the textures for the device connected at the specified index.
-    // For example, if a PlayStation 5 controller is connected at device_index 0,
-    // the icon will always show PlayStation 5 textures.
-    [Export]
-    public EForceDevice force_device { 
+	// Forces the icon to use the textures for the device connected at the specified index.
+	// For example, if a PlayStation 5 controller is connected at device_index 0,
+	// the icon will always show PlayStation 5 textures.
+	[Export]
+	public EForceDevice force_device { 
 		get 
 		{ 
 			return _force_device; 
 		}
 
-        set 
+		set 
 		{
 			_force_device = value;
-            LoadTexturePath();
+			LoadTexturePath();
 		} 
 	}
-    private EForceDevice _force_device = EForceDevice.ANY;
+	private EForceDevice _force_device = EForceDevice.ANY;
 
 	[ExportSubgroup("Text Rendering")]
-    // Custom LabelSettings. If set, overrides the addon's global label settings.
+	// Custom LabelSettings. If set, overrides the addon's global label settings.
 	[Export]
-    public LabelSettings custom_label_settings { 
+	public LabelSettings custom_label_settings { 
 		get 
 		{ 
 			return _custom_label_settings; 
 		}
 
-        set 
+		set 
 		{
 			_custom_label_settings = value;
-            LoadTexturePath();
+			LoadTexturePath();
 			
 			// Call _textures setter, which handles signal connections for label settings
-            Textures = Textures;
-        } 
+			Textures = Textures;
+		} 
 	}
-    private LabelSettings _custom_label_settings;
+	private LabelSettings _custom_label_settings;
 
-    // Returns a text representation of the displayed icon, useful for TTS
-    // (text-to-speech) scenarios.
-    // [br][br]
-    // This takes into consideration the currently displayed icon, and will thus be
-    // different if the icon is from keyboard/mouse or controller. It also takes
-    // into consideration the controller type, and will thus use native button
-    // names (e.g. [code]A[/code] for Xbox, [code]Cross[/code] for PlayStation, etc).
-    public string GetTTSString()
+	// Returns a text representation of the displayed icon, useful for TTS
+	// (text-to-speech) scenarios.
+	// [br][br]
+	// This takes into consideration the currently displayed icon, and will thus be
+	// different if the icon is from keyboard/mouse or controller. It also takes
+	// into consideration the controller type, and will thus use native button
+	// names (e.g. [code]A[/code] for Xbox, [code]Cross[/code] for PlayStation, etc).
+	public string GetTTSString()
 	{
 		if( force_type != EInputType.NONE )
 			return CI.ParsePathToTTS(path, force_type - 1);
-        else
+		else
 			return CI.ParsePathToTTS(path);
-    }
+	}
 
-    private bool CanBeShown()
+	private bool CanBeShown()
 	{
-        return show_mode switch
-        {
-            EShowMode.KEYBOARD_MOUSE => CI.LastInputType == EInputType.KEYBOARD_MOUSE,
-            EShowMode.CONTROLLER => CI.LastInputType == EInputType.CONTROLLER,
-            _ => true,
-        };
-    }
+		return show_mode switch
+		{
+			EShowMode.KEYBOARD_MOUSE => CI.LastInputType == EInputType.KEYBOARD_MOUSE,
+			EShowMode.CONTROLLER => CI.LastInputType == EInputType.CONTROLLER,
+			_ => true,
+		};
+	}
 
 	public List<Texture2D> Textures
 	{
 		get
 		{
-            return _Textures;
-        }
+			return _Textures;
+		}
 
 		set
 		{
@@ -229,136 +229,110 @@ public partial class ControllerIconTexture : Texture2D
 			{
 				if( tex != null && tex.IsConnected(SignalName.Changed, Callable.From( ReloadResource )) )
 					tex.Changed -= ReloadResource;
-            }
+			}
 
 			if( LabelSettings != null && LabelSettings.IsConnected(SignalName.Changed, Callable.From(OnLabelSettingsChanged)) )
-                LabelSettings.Changed -= OnLabelSettingsChanged;
+				LabelSettings.Changed -= OnLabelSettingsChanged;
 
-            _Textures = value;
-            LabelSettings = null;
-            if( _Textures != null && _Textures.Count > 1 )
+			_Textures = value;
+			LabelSettings = null;
+			if( _Textures != null && _Textures.Count > 1 )
 			{
-                LabelSettings = custom_label_settings;
-                if( LabelSettings == null )
+				LabelSettings = custom_label_settings;
+				if( LabelSettings == null )
 				{
-                    LabelSettings = CI.Settings.custom_label_settings;
-                }
+					LabelSettings = CI.Settings.custom_label_settings;
+				}
 
 				if( LabelSettings == null )
 				{
-                    LabelSettings = new();
-                }
+					LabelSettings = new();
+				}
 
-                LabelSettings.Changed += OnLabelSettingsChanged;
-                Font = LabelSettings.Font == null ? ThemeDB.FallbackFont : LabelSettings.Font;
-                OnLabelSettingsChanged();
-            }
+				LabelSettings.Changed += OnLabelSettingsChanged;
+				Font = LabelSettings.Font == null ? ThemeDB.FallbackFont : LabelSettings.Font;
+				OnLabelSettingsChanged();
+			}
 			// UPGRADE: In Godot 4.2, for-loop variables can be
 			// statically typed:
 			// for tex:Texture in value:
 			foreach( Texture2D tex in value)
 			{
 				if( tex != null )
-                    tex.Changed += ReloadResource;
-            }
+					tex.Changed += ReloadResource;
+			}
 		}
 	}
-    private List<Texture2D> _Textures = [];
+	private List<Texture2D> _Textures = [];
 
-    private const int _NULL_SIZE = 2;
-    private Font Font;
-    private LabelSettings LabelSettings;
-    private Vector2 TextSize;
+	private const int _NULL_SIZE = 2;
+	private Font Font;
+	private LabelSettings LabelSettings;
+	private Vector2 TextSize;
 	
-    public ControllerIconTexture()
+	public ControllerIconTexture()
 	{
-        CI.InputTypeChanged += OnInputTypeChanged;
-    }
+		CI.InputTypeChanged += OnInputTypeChanged;
+	}
 
-    public void OnLabelSettingsChanged()
+	public void OnLabelSettingsChanged()
 	{		
 		Font = LabelSettings.Font == null ? ThemeDB.FallbackFont : LabelSettings.Font;
-        TextSize = Font.GetStringSize("+", HorizontalAlignment.Left, -1, LabelSettings.FontSize);
+		TextSize = Font.GetStringSize("+", HorizontalAlignment.Left, -1, LabelSettings.FontSize);
 
-        ReloadResource();
-    }
+		ReloadResource();
+	}
 
-    private void ReloadResource()
+	private void ReloadResource()
 	{
-        Dirty = true;
-        EmitChanged();
-    }
+		Dirty = true;
+		EmitChanged();
+	}
 
-    private void LoadTexturePathImpl()
+	private void LoadTexturePathImpl()
 	{
-        List<Texture2D> textures = [];
+		List<Texture2D> textures = [];
 
-        if( CanBeShown() )
+		if( CanBeShown() )
 		{
-            EInputType input_type = force_type == EInputType.NONE ? CI.LastInputType : force_type;
-            if( CI.GetPathType(path) == EPathType.INPUT_ACTION )
+			EInputType input_type = force_type == EInputType.NONE ? CI.LastInputType : force_type;
+			if( CI.GetPathType(path) == EPathType.INPUT_ACTION )
 			{
-                InputEvent e = CI.GetMatchingEvent(path, input_type);
-                textures.AddRange(CI.ParseEventModifiers(e));				
+				InputEvent e = CI.GetMatchingEvent(path, input_type);
+				textures.AddRange(CI.ParseEventModifiers(e));				
 			}
-            int target_device = force_device != EForceDevice.ANY ? (int)force_device : CI.LastController;
-            Texture2D tex = CI.ParsePath(path, input_type, target_device, force_controller_icon_style);
+			int target_device = force_device != EForceDevice.ANY ? (int)force_device : CI.LastController;
+			Texture2D tex = CI.ParsePath(path, input_type, target_device, force_controller_icon_style);
 			if( tex != null )
 				textures.Add(tex);
 		}
 
-        Textures = textures;
-        ReloadResource();		
-    }
+		Textures = textures;
+		ReloadResource();		
+	}
 
-    private void LoadTexturePath()
+	private void LoadTexturePath()
 	{
 		// Ensure loading only occurs on the main thread
 		if( OS.GetThreadCallerId() != OS.GetMainThreadId() )
 		{
-            // In Godot 4.3, call_deferred no longer makes this function
-            // execute on the main thread due to changes in resource loading.
-            // To ensure this, we instead rely on ControllerIcons for this
-            CI.DeferTextureLoad(Callable.From( LoadTexturePathImpl ));
-        }
+			// In Godot 4.3, call_deferred no longer makes this function
+			// execute on the main thread due to changes in resource loading.
+			// To ensure this, we instead rely on ControllerIcons for this
+			CI.DeferTextureLoad(Callable.From( LoadTexturePathImpl ));
+		}
 		else
 		{
-            LoadTexturePathImpl();
-        }
+			LoadTexturePathImpl();
+		}
 	}
 
-    public void OnInputTypeChanged( EInputType inputType, int controller )
+	public void OnInputTypeChanged( EInputType inputType, int controller )
 	{
-        LoadTexturePath();
-    }
+		LoadTexturePath();
+	}
 
-    public override int _GetWidth()
-	{
-		if( CanBeShown() )
-		{
-			int ret = 0;
-			foreach( Texture2D texture in Textures )
-			{
-				if( texture != null )
-				{
-                    ret += texture.GetWidth();
-                }
-			}
-
-            if( LabelSettings != null )
-			{
-                ret += Mathf.RoundToInt( Math.Max(0, Textures.Count - 1) * TextSize.X );
-            }
-
-			// If ret is 0, return a size of 2 to prevent triggering engine checks
-			// for null sizes. The correct size will be set at a later frame.
-			return ret > 0 ? ret : _NULL_SIZE;
-        }
-
-        return _NULL_SIZE;
-    }
-
-    public override int _GetHeight()
+	public override int _GetWidth()
 	{
 		if( CanBeShown() )
 		{
@@ -367,234 +341,260 @@ public partial class ControllerIconTexture : Texture2D
 			{
 				if( texture != null )
 				{
-                    ret = Mathf.RoundToInt( Math.Max( ret, texture.GetHeight() ) );
-                }
+					ret += texture.GetWidth();
+				}
 			}
 
-            if( LabelSettings != null && Textures.Count > 1 )
+			if( LabelSettings != null )
 			{
-                ret = Mathf.RoundToInt( Math.Max(ret, TextSize.Y) );
-            }
+				ret += Mathf.RoundToInt( Math.Max(0, Textures.Count - 1) * TextSize.X );
+			}
 
 			// If ret is 0, return a size of 2 to prevent triggering engine checks
 			// for null sizes. The correct size will be set at a later frame.
 			return ret > 0 ? ret : _NULL_SIZE;
 		}
 
-        return _NULL_SIZE;
-    }
+		return _NULL_SIZE;
+	}
 
-    public override bool _HasAlpha()
+	public override int _GetHeight()
 	{
-        return Textures.Any(t => t.HasAlpha());
-    }
+		if( CanBeShown() )
+		{
+			int ret = 0;
+			foreach( Texture2D texture in Textures )
+			{
+				if( texture != null )
+				{
+					ret = Mathf.RoundToInt( Math.Max( ret, texture.GetHeight() ) );
+				}
+			}
+
+			if( LabelSettings != null && Textures.Count > 1 )
+			{
+				ret = Mathf.RoundToInt( Math.Max(ret, TextSize.Y) );
+			}
+
+			// If ret is 0, return a size of 2 to prevent triggering engine checks
+			// for null sizes. The correct size will be set at a later frame.
+			return ret > 0 ? ret : _NULL_SIZE;
+		}
+
+		return _NULL_SIZE;
+	}
+
+	public override bool _HasAlpha()
+	{
+		return Textures.Any(t => t.HasAlpha());
+	}
 
 	public override bool _IsPixelOpaque( int x, int y)
 	{
-        // TODO: Not exposed to GDScript; however, since this seems to be used for editor stuff, it's
-        // seemingly fine to just report all pixels as opaque. Otherwise, mouse picking for Sprite2D
-        // stops working.
-        return true;
-    }
+		// TODO: Not exposed to GDScript; however, since this seems to be used for editor stuff, it's
+		// seemingly fine to just report all pixels as opaque. Otherwise, mouse picking for Sprite2D
+		// stops working.
+		return true;
+	}
 
 	public override void _Draw( Rid toCanvasItem, Vector2 pos, Color modulate, bool transpose)
 	{
-        Vector2 position = pos;
+		Vector2 position = pos;
 
-        for (int i = 0; i < Textures.Count; ++i)
+		for (int i = 0; i < Textures.Count; ++i)
 		{
-            Texture2D tex = Textures[i];
+			Texture2D tex = Textures[i];
 
-            if( tex == null ) continue;
+			if( tex == null ) continue;
 
-            if( i != 0 )
+			if( i != 0 )
 			{
-                // Draw text char '+'
-                Vector2 font_position = new Vector2(
-                    position.X,
-                    position.Y + (GetHeight() - TextSize.Y) / 2.0f
-                );
+				// Draw text char '+'
+				Vector2 font_position = new Vector2(
+					position.X,
+					position.Y + (GetHeight() - TextSize.Y) / 2.0f
+				);
 
-                DrawText(toCanvasItem, font_position, "+");
+				DrawText(toCanvasItem, font_position, "+");
 			}
 
-            position += new Vector2(TextSize.X, 0);
-            tex.Draw(toCanvasItem, position, modulate, transpose);
-            position += new Vector2( tex.GetWidth(), 0 );
-        }
+			position += new Vector2(TextSize.X, 0);
+			tex.Draw(toCanvasItem, position, modulate, transpose);
+			position += new Vector2( tex.GetWidth(), 0 );
+		}
 	}
 
-    public override void _DrawRect( Rid toCanvasItem, Rect2 rect, bool tile, Color modulate, bool transpose )
+	public override void _DrawRect( Rid toCanvasItem, Rect2 rect, bool tile, Color modulate, bool transpose )
 	{
-        Vector2 position = rect.Position;
-        float widthRatio = rect.Size.X / _GetWidth();
-        float heightRatio = rect.Size.Y / _GetHeight();
+		Vector2 position = rect.Position;
+		float widthRatio = rect.Size.X / _GetWidth();
+		float heightRatio = rect.Size.Y / _GetHeight();
 
-        for (int i = 0; i < Textures.Count; ++i )
+		for (int i = 0; i < Textures.Count; ++i )
 		{
-            Texture2D tex = Textures[i];
+			Texture2D tex = Textures[i];
 
-            if( tex == null) continue;
+			if( tex == null) continue;
 
-            if( i != 0 )
+			if( i != 0 )
 			{
-                // Draw text char '+'
-                Vector2 fontPosition = new Vector2(
-                    position.X + (TextSize.X * widthRatio) / 2 - (TextSize.X / 2),
-                    position.Y + (rect.Size.Y - TextSize.Y) / 2.0f
-                );
-                DrawText(toCanvasItem, fontPosition, "+");
-                position += new Vector2( TextSize.X * widthRatio, 0 );
-            }
+				// Draw text char '+'
+				Vector2 fontPosition = new Vector2(
+					position.X + (TextSize.X * widthRatio) / 2 - (TextSize.X / 2),
+					position.Y + (rect.Size.Y - TextSize.Y) / 2.0f
+				);
+				DrawText(toCanvasItem, fontPosition, "+");
+				position += new Vector2( TextSize.X * widthRatio, 0 );
+			}
 
-            Vector2 size = tex.GetSize() * new Vector2(widthRatio, heightRatio);
-            tex.DrawRect(toCanvasItem, new Rect2(position, size), tile, modulate, transpose);
-            position += new Vector2( size.X, 0 );
+			Vector2 size = tex.GetSize() * new Vector2(widthRatio, heightRatio);
+			tex.DrawRect(toCanvasItem, new Rect2(position, size), tile, modulate, transpose);
+			position += new Vector2( size.X, 0 );
 		}
-    }
+	}
 
-    public override void _DrawRectRegion( Rid toCanvasItem, Rect2 rect, Rect2 srcRect, Color modulate, bool transpose, bool clipUV)
+	public override void _DrawRectRegion( Rid toCanvasItem, Rect2 rect, Rect2 srcRect, Color modulate, bool transpose, bool clipUV)
 	{
-        Vector2 position = rect.Position;
-        float widthRatio = rect.Size.X / _GetWidth();
-        float heightRatio = rect.Size.Y / _GetHeight();
+		Vector2 position = rect.Position;
+		float widthRatio = rect.Size.X / _GetWidth();
+		float heightRatio = rect.Size.Y / _GetHeight();
 
-        for (int i = 0; i < Textures.Count; ++i )
+		for (int i = 0; i < Textures.Count; ++i )
 		{
-            Texture2D tex = Textures[i];
+			Texture2D tex = Textures[i];
 
-            if( tex == null) continue;
+			if( tex == null) continue;
 
-            if( i != 0 )
+			if( i != 0 )
 			{
-                // Draw text char '+'
-                Vector2 fontPosition = new(
-                    position.X + (TextSize.X * widthRatio) / 2 - (TextSize.X / 2),
-                    position.Y + (rect.Size.Y - TextSize.Y) / 2.0f
-                );
-                DrawText(toCanvasItem, fontPosition, "+");
+				// Draw text char '+'
+				Vector2 fontPosition = new(
+					position.X + (TextSize.X * widthRatio) / 2 - (TextSize.X / 2),
+					position.Y + (rect.Size.Y - TextSize.Y) / 2.0f
+				);
+				DrawText(toCanvasItem, fontPosition, "+");
 
-                position += new Vector2(TextSize.X * widthRatio, 0);
-            } 
+				position += new Vector2(TextSize.X * widthRatio, 0);
+			} 
 
-            Vector2 size = tex.GetSize() * new Vector2(widthRatio, heightRatio);
+			Vector2 size = tex.GetSize() * new Vector2(widthRatio, heightRatio);
 
-            Vector2 srcRectRatio = new(
-                tex.GetWidth() / (float)_GetWidth(),
-                tex.GetHeight() / (float)_GetHeight()
-            );
-            Rect2 texSrcRect = new(
-                srcRect.Position * srcRectRatio,
-                srcRect.Size * srcRectRatio
-            );
+			Vector2 srcRectRatio = new(
+				tex.GetWidth() / (float)_GetWidth(),
+				tex.GetHeight() / (float)_GetHeight()
+			);
+			Rect2 texSrcRect = new(
+				srcRect.Position * srcRectRatio,
+				srcRect.Size * srcRectRatio
+			);
 
-            tex.DrawRectRegion(toCanvasItem, new Rect2(position, size), texSrcRect, modulate, transpose, clipUV);
-            position += new Vector2( size.X, 0 );
+			tex.DrawRectRegion(toCanvasItem, new Rect2(position, size), texSrcRect, modulate, transpose, clipUV);
+			position += new Vector2( size.X, 0 );
 		}
-    }
+	}
 
-    private void DrawText( Rid toCanvasItem, Vector2 fontPosition, string text )
+	private void DrawText( Rid toCanvasItem, Vector2 fontPosition, string text )
 	{
-        fontPosition += new Vector2(0, Font.GetAscent(LabelSettings.FontSize));
+		fontPosition += new Vector2(0, Font.GetAscent(LabelSettings.FontSize));
 
-        if( LabelSettings.ShadowColor.A > 0 )
+		if( LabelSettings.ShadowColor.A > 0 )
 		{
-            Font.DrawString(toCanvasItem, fontPosition + LabelSettings.ShadowOffset, text, HorizontalAlignment.Left, -1, LabelSettings.FontSize, LabelSettings.ShadowColor);
-            if( LabelSettings.ShadowSize > 0 )
+			Font.DrawString(toCanvasItem, fontPosition + LabelSettings.ShadowOffset, text, HorizontalAlignment.Left, -1, LabelSettings.FontSize, LabelSettings.ShadowColor);
+			if( LabelSettings.ShadowSize > 0 )
 				Font.DrawStringOutline(toCanvasItem, fontPosition + LabelSettings.ShadowOffset, text, HorizontalAlignment.Left, -1, LabelSettings.FontSize, LabelSettings.ShadowSize, LabelSettings.ShadowColor);
-        }
+		}
 		if( LabelSettings.OutlineColor.A > 0 && LabelSettings.OutlineSize > 0 )
 		{
-            Font.DrawStringOutline(toCanvasItem, fontPosition, text, HorizontalAlignment.Left, -1, LabelSettings.FontSize, LabelSettings.OutlineSize, LabelSettings.OutlineColor);
-        }
+			Font.DrawStringOutline(toCanvasItem, fontPosition, text, HorizontalAlignment.Left, -1, LabelSettings.FontSize, LabelSettings.OutlineSize, LabelSettings.OutlineColor);
+		}
 
-        Font.DrawString(toCanvasItem, fontPosition, text, HorizontalAlignment.Center, -1, LabelSettings.FontSize, LabelSettings.FontColor);
-    }
+		Font.DrawString(toCanvasItem, fontPosition, text, HorizontalAlignment.Center, -1, LabelSettings.FontSize, LabelSettings.FontColor);
+	}
 
-    private SubViewport HelperViewport;
-    private bool IsStitchingTexture = false;
-    private async void StitchTexture()
+	private SubViewport HelperViewport;
+	private bool IsStitchingTexture = false;
+	private async void StitchTexture()
 	{
 		if( Textures.Count == 0 )
-            return;
+			return;
 
-        IsStitchingTexture = true;
+		IsStitchingTexture = true;
 
-        Image fontImage = null;
-        if( Textures.Count > 1 )
+		Image fontImage = null;
+		if( Textures.Count > 1 )
 		{
-            // Generate a viewport to draw the text
-            HelperViewport = new SubViewport
-            {
-                // FIXME: We need a 3px margin for some reason
-                Size = (Vector2I)(TextSize + new Vector2(3, 0)),
+			// Generate a viewport to draw the text
+			HelperViewport = new SubViewport
+			{
+				// FIXME: We need a 3px margin for some reason
+				Size = (Vector2I)(TextSize + new Vector2(3, 0)),
 
-                RenderTargetUpdateMode = SubViewport.UpdateMode.Once,
-                RenderTargetClearMode = SubViewport.ClearMode.Once,
-                TransparentBg = true
-            };
+				RenderTargetUpdateMode = SubViewport.UpdateMode.Once,
+				RenderTargetClearMode = SubViewport.ClearMode.Once,
+				TransparentBg = true
+			};
 
-            Label label = new()
-            {
-                LabelSettings = LabelSettings,
-                Text = "+",
+			Label label = new()
+			{
+				LabelSettings = LabelSettings,
+				Text = "+",
 
-                Position = Vector2.Zero
-            };
+				Position = Vector2.Zero
+			};
 
-            HelperViewport.AddChild(label);
+			HelperViewport.AddChild(label);
 
-            CI.AddChild(HelperViewport);
-            //await RenderingServer.FramePostDraw;
-            await ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
-            fontImage = HelperViewport.GetTexture().GetImage();
+			CI.AddChild(HelperViewport);
+			//await RenderingServer.FramePostDraw;
+			await ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+			fontImage = HelperViewport.GetTexture().GetImage();
 
-            CI.RemoveChild(HelperViewport);
-            HelperViewport.Free();
-        }
+			CI.RemoveChild(HelperViewport);
+			HelperViewport.Free();
+		}
 
-        Vector2I position = new(0, 0);
+		Vector2I position = new(0, 0);
 
-        Image img = new();
-        for (int i = 0; i < Textures.Count; ++i )
+		Image img = new();
+		for (int i = 0; i < Textures.Count; ++i )
 		{
 			if( Textures[i] == null ) continue;
 
-            if( i != 0 )
+			if( i != 0 )
 			{
 				// Draw text char '+'
 				Rect2I region = fontImage.GetUsedRect();
-                Vector2I fontPosition = new(
-                    position.X,
-                    position.Y + (GetHeight() - region.Size.Y) / 2
-                );
+				Vector2I fontPosition = new(
+					position.X,
+					position.Y + (GetHeight() - region.Size.Y) / 2
+				);
 
-                img.BlitRect( fontImage, region, fontPosition );
-                position += new Vector2I( region.Size.X, 0 );
-            }
+				img.BlitRect( fontImage, region, fontPosition );
+				position += new Vector2I( region.Size.X, 0 );
+			}
 
-            Image textureRaw = Textures[i].GetImage();
-            textureRaw.Decompress();
-            img ??= Image.CreateEmpty(_GetWidth(), _GetHeight(), true, textureRaw.GetFormat());
+			Image textureRaw = Textures[i].GetImage();
+			textureRaw.Decompress();
+			img ??= Image.CreateEmpty(_GetWidth(), _GetHeight(), true, textureRaw.GetFormat());
 
-            img.BlitRect(textureRaw, new Rect2I(0, 0, textureRaw.GetWidth(), textureRaw.GetHeight()), position);
+			img.BlitRect(textureRaw, new Rect2I(0, 0, textureRaw.GetWidth(), textureRaw.GetHeight()), position);
 
-            position += new Vector2I( textureRaw.GetWidth(), 0 );
-        }
+			position += new Vector2I( textureRaw.GetWidth(), 0 );
+		}
 
-        IsStitchingTexture = false;
+		IsStitchingTexture = false;
 
-        Dirty = false;
-        Texture3D = ImageTexture.CreateFromImage(img);
-        EmitChanged();
-    }
+		Dirty = false;
+		Texture3D = ImageTexture.CreateFromImage(img);
+		EmitChanged();
+	}
 
-    // This is necessary for 3D sprites, as the texture is assigned to a material, and not drawn directly.
-    // For multi prompts, we need to generate a texture
-    private bool Dirty = true;
+	// This is necessary for 3D sprites, as the texture is assigned to a material, and not drawn directly.
+	// For multi prompts, we need to generate a texture
+	private bool Dirty = true;
 
-    private Texture Texture3D;
-    public override Rid _GetRid()
+	private Texture Texture3D;
+	public override Rid _GetRid()
 	{
 		if( Dirty )
 		{
@@ -603,15 +603,15 @@ public partial class ControllerIconTexture : Texture2D
 				// This results in a one-frame white texture being displayed, which is not ideal. Investigate later.
 				StitchTexture();
 				
-            if( IsStitchingTexture )
-                return new Rid(null);
+			if( IsStitchingTexture )
+				return new Rid(null);
 
-            else
+			else
 			{
-                return new Rid(null);
+				return new Rid(null);
 			}
 				
-        }
+		}
 		return Textures.Count > 0 ? Texture3D.GetRid() : new Rid(null);
-    }
+	}
 }

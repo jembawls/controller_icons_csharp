@@ -7,28 +7,28 @@ using static ControllerIcons;
 [Tool]
 public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 {
-    public EditorInterface EditorInterface;
+	public EditorInterface EditorInterface;
 	private ControllerIcons_TexturePreview preview;
 
 	class ControllerIcons_TexturePreview
 	{
-        private MarginContainer nRoot;
-        private TextureRect nBackground;
-        private TextureRect nIconTexture;
-        private Texture2D BackgroundTexture;
+		private MarginContainer nRoot;
+		private TextureRect nBackground;
+		private TextureRect nIconTexture;
+		private Texture2D BackgroundTexture;
 
-        public Texture2D Texture
+		public Texture2D Texture
 		{
-            get { return _Texture;  }
+			get { return _Texture;  }
 			set
 			{
-                _Texture = value;
-                nIconTexture.Texture = _Texture;
-            }
-        }
-        private Texture2D _Texture;
+				_Texture = value;
+				nIconTexture.Texture = _Texture;
+			}
+		}
+		private Texture2D _Texture;
 
-        public ControllerIcons_TexturePreview(EditorInterface editorInterface)
+		public ControllerIcons_TexturePreview(EditorInterface editorInterface)
 		{
 			nRoot = new();
 
@@ -37,21 +37,21 @@ public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 			// background = EditorInterface.get_base_control().get_theme_icon("Checkerboard", "EditorIcons")
 			BackgroundTexture = editorInterface.GetBaseControl().GetThemeIcon("Checkerboard", "EditorIcons");
 
-            nBackground = new()
-            {
-                StretchMode = TextureRect.StretchModeEnum.Tile,
-                Texture = BackgroundTexture,
-                TextureRepeat = CanvasItem.TextureRepeatEnum.Enabled,
-                CustomMinimumSize = new Vector2(0, 256)
-            };
+			nBackground = new()
+			{
+				StretchMode = TextureRect.StretchModeEnum.Tile,
+				Texture = BackgroundTexture,
+				TextureRepeat = CanvasItem.TextureRepeatEnum.Enabled,
+				CustomMinimumSize = new Vector2(0, 256)
+			};
 
-            nRoot.AddChild(nBackground);
+			nRoot.AddChild(nBackground);
 
-            nIconTexture = new()
-            {
-                TextureFilter = CanvasItem.TextureFilterEnum.NearestWithMipmaps
-            };
-            nIconTexture.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+			nIconTexture = new()
+			{
+				TextureFilter = CanvasItem.TextureFilterEnum.NearestWithMipmaps
+			};
+			nIconTexture.SetAnchorsPreset(Control.LayoutPreset.FullRect);
 			nIconTexture.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
 			nIconTexture.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
 
@@ -62,27 +62,27 @@ public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 		{
 			return nRoot;
 		}
-    }
+	}
 
 	public override bool _CanHandle( GodotObject obj )
 	{
-        return obj is ControllerIconTexture;
-    }
+		return obj is ControllerIconTexture;
+	}
 
 	public override void _ParseBegin( GodotObject obj )
 	{
-        preview = new(EditorInterface);
-        AddCustomControl(preview.get_root());
+		preview = new(EditorInterface);
+		AddCustomControl(preview.get_root());
 
-        if( obj is ControllerIconTexture icon )
+		if( obj is ControllerIconTexture icon )
 			preview.Texture = icon;
-    }
+	}
 
 	public override bool _ParseProperty( GodotObject obj, Variant.Type type, string name, PropertyHint hint_type, string hint_string, PropertyUsageFlags usage_flags, bool wide )
 	{
 		if( name == "path" )
 		{
-            ControllerIconPathEditorProperty path_selector_instance = new( EditorInterface );
+			ControllerIconPathEditorProperty path_selector_instance = new( EditorInterface );
 			AddPropertyEditor(name, path_selector_instance);
 			return true;
 		}

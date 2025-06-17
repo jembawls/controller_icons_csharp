@@ -10,16 +10,16 @@ public partial class JoypadPathSelector : Panel
 	[Signal]
 	private delegate void DoneEventHandler();
 
-    private Label ButtonLabel;
-    private Godot.Collections.Array<Button> ButtonNodes;
+	private Label ButtonLabel;
+	private Godot.Collections.Array<Button> ButtonNodes;
 
-    private Button LastPressedButton;
-    private ulong LastPressedTimestamp;
+	private Button LastPressedButton;
+	private ulong LastPressedTimestamp;
 
-    public override void _Ready()
+	public override void _Ready()
 	{
-        ButtonLabel = GetNode<Label>("%ButtonLabel");
-        ButtonNodes = [
+		ButtonLabel = GetNode<Label>("%ButtonLabel");
+		ButtonNodes = [
 			GetNode<Button>("%LT"), GetNode<Button>("%RT"),
 			GetNode<Button>("%LStick"), GetNode<Button>("%RStick"),
 			GetNode<Button>("%LStickClick"), GetNode<Button>("%RStickClick"),
@@ -29,16 +29,16 @@ public partial class JoypadPathSelector : Panel
 			GetNode<Button>("%DPADDown"), GetNode<Button>("%DPADRight"),
 			GetNode<Button>("%DPADLeft"), GetNode<Button>("%DPADUp")
 		];	
-    }
+	}
 
-    public void Populate( EditorInterface editorInterface )
+	public void Populate( EditorInterface editorInterface )
 	{
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for button:Button in button_nodes:
 		foreach( Button button in ButtonNodes )
-            button.ButtonPressed = false;
-    }
+			button.ButtonPressed = false;
+	}
 
 	public string GetIconPath()
 	{
@@ -49,7 +49,7 @@ public partial class JoypadPathSelector : Panel
 		{
 			if( button.ButtonPressed )
 				return ( button.Icon as ControllerIconTexture ).path;
-        }
+		}
 
 		return "";
 	}

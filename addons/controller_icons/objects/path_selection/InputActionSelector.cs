@@ -10,50 +10,50 @@ public partial class InputActionSelector : Panel
 	[Signal]
 	private delegate void DoneEventHandler();
 
-    private LineEdit nNameFilter;
-    private CheckButton nBuiltInActionButton;
-    private Tree nTree;
+	private LineEdit nNameFilter;
+	private CheckButton nBuiltInActionButton;
+	private Tree nTree;
 
-    private TreeItem root;
-    private List<ControllerIcons_Item> items = [];
+	private TreeItem root;
+	private List<ControllerIcons_Item> items = [];
 
 	public override void _Ready()
 	{
-        nNameFilter = GetNode<LineEdit>("%NameFilter");
+		nNameFilter = GetNode<LineEdit>("%NameFilter");
 		nBuiltInActionButton = GetNode<CheckButton>("%BuiltinActionButton");
 		nTree = GetNode<Tree>("%Tree");
-    }
+	}
 
-    class ControllerIcons_Item
-    {
-        public bool IsDefault;
-        public TreeItem nTreeItem;
-        private ControllerIconTexture ControllerIcon_Key;
-        private ControllerIconTexture ControllerIcon_Joy;
+	class ControllerIcons_Item
+	{
+		public bool IsDefault;
+		public TreeItem nTreeItem;
+		private ControllerIconTexture ControllerIcon_Key;
+		private ControllerIconTexture ControllerIcon_Joy;
 
-        public bool ShowDefault
-        {
-            get { return _ShowDefault; }
-            set
+		public bool ShowDefault
+		{
+			get { return _ShowDefault; }
+			set
 			{
-                _ShowDefault = value;
-                QueryVisibility();
-            }
+				_ShowDefault = value;
+				QueryVisibility();
+			}
 
-        }
-    	private bool _ShowDefault;
+		}
+		private bool _ShowDefault;
 		
-        public bool Filtered
-        {
-            get { return _Filtered; }
-            set
+		public bool Filtered
+		{
+			get { return _Filtered; }
+			set
 			{
-                _Filtered = value;
-                QueryVisibility();
-            }
+				_Filtered = value;
+				QueryVisibility();
+			}
 
-        }
-    	private bool _Filtered;
+		}
+		private bool _Filtered;
 
 		public ControllerIcons_Item(Tree tree, TreeItem root, string path, bool is_default )
 		{
@@ -63,19 +63,19 @@ public partial class InputActionSelector : Panel
 
 			nTreeItem.SetText(0, path);
 
-            ControllerIcon_Key = new()
-            {
-                path = path,
-                force_type = EInputType.KEYBOARD_MOUSE
-            };
+			ControllerIcon_Key = new()
+			{
+				path = path,
+				force_type = EInputType.KEYBOARD_MOUSE
+			};
 
-            ControllerIcon_Joy = new()
-            {
-                path = path,
-                force_type = EInputType.CONTROLLER
-            };
+			ControllerIcon_Joy = new()
+			{
+				path = path,
+				force_type = EInputType.CONTROLLER
+			};
 
-            nTreeItem.SetIconMaxWidth(1, 48 * ControllerIcon_Key.Textures.Count);
+			nTreeItem.SetIconMaxWidth(1, 48 * ControllerIcon_Key.Textures.Count);
 
 			nTreeItem.SetIconMaxWidth(2, 48 * ControllerIcon_Key.Textures.Count);
 			nTreeItem.SetIcon(1, ControllerIcon_Key);
@@ -86,18 +86,18 @@ public partial class InputActionSelector : Panel
 		{
 			if( IsInstanceValid(nTreeItem) )
 				nTreeItem.Visible = ShowDefault && Filtered;
-        }
+		}
 	}
 
-    public void Populate( EditorInterface editor_interface )
+	public void Populate( EditorInterface editor_interface )
 	{
-        // Clear
-        nTree.Clear();
+		// Clear
+		nTree.Clear();
 
-        // Using clear() triggers a signal and uses freed nodes.
-        // Setting the text directly does not.
-        nNameFilter.Text = "";
-        items.Clear();
+		// Using clear() triggers a signal and uses freed nodes.
+		// Setting the text directly does not.
+		nNameFilter.Text = "";
+		items.Clear();
 
 		nNameFilter.RightIcon = editor_interface.GetBaseControl().GetThemeIcon("Search", "EditorIcons");
 
@@ -116,11 +116,11 @@ public partial class InputActionSelector : Panel
 		foreach( string key in CI.BuiltInKeys )
 		{
 			default_actions.Add( key.TrimPrefix("input/") );
-        }
+		}
 
-        // Map with all input actions
-        root = nTree.CreateItem();
-        foreach( string data in CI.CustomInputActions.Keys )
+		// Map with all input actions
+		root = nTree.CreateItem();
+		foreach( string data in CI.CustomInputActions.Keys )
 		{
 			ControllerIcons_Item child = new(nTree, root, data, default_actions.Contains(data) );
 			items.Add(child);
@@ -131,12 +131,12 @@ public partial class InputActionSelector : Panel
 
 	public string GetIconPath()
 	{
-        TreeItem item = nTree.GetSelected();
-        if( IsInstanceValid(item) )
-            return item.GetText(0);
+		TreeItem item = nTree.GetSelected();
+		if( IsInstanceValid(item) )
+			return item.GetText(0);
 
-        return "";
-    }
+		return "";
+	}
 
 	private void SetDefaultActionsVisibility( bool display )
 	{
@@ -151,18 +151,18 @@ public partial class InputActionSelector : Panel
 
 	private void _GrabFocus()
 	{
-        nNameFilter.GrabFocus();
-    }
+		nNameFilter.GrabFocus();
+	}
 
 	private void OnBuiltInActionButtonToggled( bool toggled_on )
 	{
-        SetDefaultActionsVisibility(toggled_on);
-    }
+		SetDefaultActionsVisibility(toggled_on);
+	}
 
 	private void OnTreeItemActivated()
 	{
-        EmitSignalDone();
-    }
+		EmitSignalDone();
+	}
 
 	private void OnNameFilterTextChanged( string new_text )
 	{
@@ -172,8 +172,8 @@ public partial class InputActionSelector : Panel
 		foreach( ControllerIcons_Item item in items )
 		{
 			bool filtered = new_text.Length == 0 || item.nTreeItem.GetText(0).FindN(new_text) != -1;
-        	item.Filtered = filtered;
+			item.Filtered = filtered;
 		}
-    }
+	}
 
 }

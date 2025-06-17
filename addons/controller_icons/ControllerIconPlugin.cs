@@ -6,30 +6,30 @@ using System.Linq;
 [Tool]
 public partial class ControllerIconPlugin : EditorPlugin
 {
-    private ControllerIconEditorInspector inspectorPlugin;
+	private ControllerIconEditorInspector inspectorPlugin;
 
-    public override void _EnablePlugin()
+	public override void _EnablePlugin()
 	{
-        AddAutoloadSingleton("ControllerIcons", "res://addons/controller_icons/ControllerIcons.cs");
-    }
+		AddAutoloadSingleton("ControllerIcons", "res://addons/controller_icons/ControllerIcons.cs");
+	}
 
 	public override void _DisablePlugin()
 	{
-        RemoveAutoloadSingleton("ControllerIcons");
-    }
+		RemoveAutoloadSingleton("ControllerIcons");
+	}
 
 	public override void _EnterTree()
 	{
-        inspectorPlugin = new()
-        {
-            EditorInterface = EditorInterface.Singleton
-        };
+		inspectorPlugin = new()
+		{
+			EditorInterface = EditorInterface.Singleton
+		};
 
-        AddInspectorPlugin(inspectorPlugin);
-    }
+		AddInspectorPlugin(inspectorPlugin);
+	}
 
 	public override void _ExitTree()
 	{
-        RemoveInspectorPlugin(inspectorPlugin);
-    }
+		RemoveInspectorPlugin(inspectorPlugin);
+	}
 }
