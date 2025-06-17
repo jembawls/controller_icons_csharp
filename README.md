@@ -33,8 +33,8 @@ I've only done some basic testing on this but it seems to work. However, your pr
     * "TextureRect.gd" --> "ControllerTextureRect.cs"
     * "Button.gd" --> "ControllerButton.cs"
 6. Build your project.
-     * If, somehow, you aren't using a text editor/IDE, you may have to launch the engine and build in there and then restart the engine.
-8. From this point on, you will have a bunch of UID warnings/errors. This is because the UIDs of the old plugin won't match the new UIDs of the new plugin. This shouldn't block the plugin from working, but you'll likely want to hunt down each one manually and fix them. The way to fix it is to just copy the UID in the warning/error, look for where it is referenced in your project (likely some `metadata/_custom_type_script` line in a `*.tscn` file) and remove the line  - or replace it with the UID that corresponds with the new C# file (most likely the UID in `ControllerIconTexture.cs.uid` if you are not using deprecated features).
+     * If you aren't using a text editor/IDE to build your game, you may have to launch the engine and build in there and then restart the engine.
+7. At this point on, you may have a bunch of UID warnings/errors. This is because the UIDs of the old plugin won't match the new UIDs of the new plugin. This shouldn't block the plugin from working, but you'll likely want to hunt down each one manually and fix them. The way to fix it is to just copy the UID in the warning/error, look for where it is referenced in your project (likely some `metadata/_custom_type_script` line in a `*.tscn` file) and remove the line  - or replace it with the UID that corresponds with the new C# file (most likely the UID in `ControllerIconTexture.cs.uid` if you are not using deprecated features).
 
 And you should be done!
 
