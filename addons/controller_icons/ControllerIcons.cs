@@ -7,21 +7,21 @@ using System.Linq;
 public partial class ControllerIcons : Node
 {
 	[Signal]
-	public delegate void InputTypeChangedEventHandler(InputType input_type, int controller);
+	public delegate void InputTypeChangedEventHandler(EInputType inputType, int controller);
 
-	public enum InputType {
+	public enum EInputType {
         NONE,
 		KEYBOARD_MOUSE, // The input is from the keyboard and/or mouse.
 		CONTROLLER // The input is from a controller.
 	}
 
-	public enum PathType {
+	public enum EPathType {
 		INPUT_ACTION, // The path is an input action.
 		JOYPAD_PATH, // The path is a generic joypad path.
 		SPECIFIC_PATH // The path is a specific path.
 	}
 
-    public enum ShowMode
+    public enum EShowMode
     {
         ANY, // Icon will be display on any input method.
         KEYBOARD_MOUSE, // Icon will be display only when the keyboard/mouse is being used.
@@ -30,31 +30,31 @@ public partial class ControllerIcons : Node
 
     public static ControllerIcons CI { get; set; }
 
-    private Godot.Collections.Dictionary<string, Texture2D> _cached_icons = [];
-    public Godot.Collections.Dictionary<string, Godot.Collections.Array<InputEvent>> _custom_input_actions = [];
+    private Godot.Collections.Dictionary<string, Texture2D> _CachedIcons = [];
+    public Godot.Collections.Dictionary<string, Godot.Collections.Array<InputEvent>> CustomInputActions = [];
 
-    private Mutex _cached_callables_lock = new();
-	private readonly List<Callable> _cached_callables = [];
+    private Mutex _CachedCallablesLock = new();
+	private readonly List<Callable> _CachedCallables = [];
 
-	public InputType _last_input_type = InputType.KEYBOARD_MOUSE;
-	public int _last_controller;
-	public ControllerSettings _settings = ResourceLoader.Load<ControllerSettings>("res://addons/controller_icons/settings.tres");
-	public string _base_extension = "png";
+	public EInputType LastInputType = EInputType.KEYBOARD_MOUSE;
+	public int LastController;
+	public ControllerSettings Settings = ResourceLoader.Load<ControllerSettings>("res://addons/controller_icons/settings.tres");
+	public string BaseExtension = "png";
 
     // Custom mouse velocity calculation, because Godot
     // doesn't implement it on some OSes apparently
     private const float _MOUSE_VELOCITY_DELTA = 0.1f;
     private float _t;
-    private int _mouse_velocity;
+    private int MouseVelocity;
 
     private bool setLikelyInput = false;
 
-    private ControllerMapper _mapper = new();
+    private ControllerMapper Mapper = new();
 
     // Default actions will be the builtin editor actions when
     // the script is at editor ("tool") level. To pickup more
     // actions available, these have to be queried manually
-    public readonly Godot.Collections.Array<string> _builtin_keys = [
+    public readonly Godot.Collections.Array<string> BuiltInKeys = [
         "input/ui_accept", "input/ui_cancel", "input/ui_copy",
         "input/ui_cut", "input/ui_down", "input/ui_end",
         "input/ui_filedialog_refresh", "input/ui_filedialog_show_hidden",
@@ -99,11 +99,11 @@ public partial class ControllerIcons : Node
         Setup();
     }
 
-    private void _set_last_input_type( InputType __last_input_type, int __last_controller)
+    private void SetLastInputType( EInputType lastInputType, int lastController)
     {
-        _last_input_type = __last_input_type;
-        _last_controller = __last_controller;
-        CI.EmitSignalInputTypeChanged(_last_input_type, _last_controller);
+        LastInputType = lastInputType;
+        LastController = lastController;
+        CI.EmitSignalInputTypeChanged(LastInputType, LastController);
     }
 
     public void Setup()
@@ -117,21 +117,21 @@ public partial class ControllerIcons : Node
 
     public override void _ExitTree()
     {
-        _mapper = null;
+        Mapper = null;
     }
 
 	public void ParseInputActions()
 	{
-        _custom_input_actions.Clear();
+        CustomInputActions.Clear();
 
-        foreach( string key in _builtin_keys )
+        foreach( string key in BuiltInKeys )
 		{
             Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)ProjectSettings.GetSetting(key);
             if( data.Count > 1 && 
                 data.ContainsKey("events") && 
                 data["events"].AsGodotArray<InputEvent>() is Godot.Collections.Array<InputEvent> events )
 			{
-                _add_custom_input_action(key.TrimPrefix("input/"), events);
+                AddCustomInputAction(key.TrimPrefix("input/"), events);
             }
 		}
 
@@ -139,19 +139,19 @@ public partial class ControllerIcons : Node
         // the default mappings. The way to get around this is
         // manually parsing the project file and adding the
         // new input actions to lookup.
-        ConfigFile proj_file = new();
-        if( proj_file.Load("res://project.godot") != Error.Ok )
+        ConfigFile projFile = new();
+        if( projFile.Load("res://project.godot") != Error.Ok )
 		{
             GD.PrintErr("Failed to open \"project.godot\"! Custom input actions will not work on editor view!");
             return;
         }
 
-		if( proj_file.HasSection("input") )
+		if( projFile.HasSection("input") )
 		{
-            foreach( string input_action in proj_file.GetSectionKeys("input") )
+            foreach( string input_action in projFile.GetSectionKeys("input") )
 			{
-                Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)proj_file.GetValue("input", input_action);
-                _add_custom_input_action(input_action, data["events"].AsGodotArray<InputEvent>());
+                Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)projFile.GetValue("input", input_action);
+                AddCustomInputAction(input_action, data["events"].AsGodotArray<InputEvent>());
 			}
         }
 	}
@@ -159,14 +159,14 @@ public partial class ControllerIcons : Node
 	public override void _Ready()
 	{
         Input.JoyConnectionChanged += OnJoyConnectionChangedEventHandler;
-        _settings = ResourceLoader.Load<ControllerSettings>("res://addons/controller_icons/settings.tres");
+        Settings = ResourceLoader.Load<ControllerSettings>("res://addons/controller_icons/settings.tres");
 
-		_settings ??= new();
-        _mapper ??= new();
+		Settings ??= new();
+        Mapper ??= new();
 
-        if( !string.IsNullOrWhiteSpace(_settings.custom_file_extension) )
+        if( !string.IsNullOrWhiteSpace(Settings.custom_file_extension) )
 		{
-            _base_extension = _settings.custom_file_extension;
+            BaseExtension = Settings.custom_file_extension;
         }
 
         // Wait a frame to give a chance for the app to initialize
@@ -177,62 +177,62 @@ public partial class ControllerIcons : Node
     {
         if( connected )
 		{
-            _set_last_input_type(InputType.CONTROLLER, (int)device);
+            SetLastInputType(EInputType.CONTROLLER, (int)device);
         }
         else
 		{
 			if( Input.GetConnectedJoypads().Count == 0 )
 			{
-				_set_last_input_type(InputType.KEYBOARD_MOUSE, -1);
+				SetLastInputType(EInputType.KEYBOARD_MOUSE, -1);
 			}
             else
 			{
-				_set_last_input_type(InputType.CONTROLLER, Input.GetConnectedJoypads().First());
+				SetLastInputType(EInputType.CONTROLLER, Input.GetConnectedJoypads().First());
 			}
         }
 	}
 
     public override void _Input( InputEvent e )
 	{
-        InputType input_type = _last_input_type;
-        int controller = _last_controller;
+        EInputType inputType = LastInputType;
+        int controller = LastController;
         switch( e.GetClass() )
 		{
 			case "InputEventKey":
 			case "InputEventMouseButton":
-                input_type = InputType.KEYBOARD_MOUSE;
+                inputType = EInputType.KEYBOARD_MOUSE;
                 break;
 			case "InputEventMouseMotion":
-				if( _settings.allow_mouse_remap && _test_mouse_velocity((e as InputEventMouseMotion).Relative) )
+				if( Settings.allow_mouse_remap && TestMouseVelocity((e as InputEventMouseMotion).Relative) )
 				{
-					input_type = InputType.KEYBOARD_MOUSE;
+					inputType = EInputType.KEYBOARD_MOUSE;
 				}
                 break;
 			case "InputEventJoypadButton":
-				input_type = InputType.CONTROLLER;
+				inputType = EInputType.CONTROLLER;
                 controller = e.Device;
                 break;
             case "InputEventJoypadMotion":
-                if( Mathf.Abs((e as InputEventJoypadMotion).AxisValue) > _settings.joypad_deadzone )
+                if( Mathf.Abs((e as InputEventJoypadMotion).AxisValue) > Settings.joypad_deadzone )
 				{
-					input_type = InputType.CONTROLLER;
+					inputType = EInputType.CONTROLLER;
 					controller = e.Device;
 				}
                 break;
 		}
 
-		if( input_type != _last_input_type || controller != _last_controller )
+		if( inputType != LastInputType || controller != LastController )
 		{
-            _set_last_input_type(input_type, controller);
+            SetLastInputType(inputType, controller);
         }
 	}
 
-	private bool _test_mouse_velocity(Vector2 relative_vec )
+	private bool TestMouseVelocity(Vector2 relative_vec )
 	{
 		if( _t > _MOUSE_VELOCITY_DELTA )
 		{
             _t = 0;
-            _mouse_velocity = 0;
+            MouseVelocity = 0;
         }
 
         // We do a component sum instead of a length, to save on a
@@ -240,22 +240,22 @@ public partial class ControllerIcons : Node
 		// affected by low value vectors (<10).
 		// It is also good enough for this system, so reliability
 		// is sacrificed in favor of speed.
-        _mouse_velocity += Mathf.RoundToInt(Mathf.Abs(relative_vec.X) + Mathf.Abs(relative_vec.Y));
+        MouseVelocity += Mathf.RoundToInt(Mathf.Abs(relative_vec.X) + Mathf.Abs(relative_vec.Y));
 
-        return _mouse_velocity / _MOUSE_VELOCITY_DELTA > _settings.mouse_min_movement;
+        return MouseVelocity / _MOUSE_VELOCITY_DELTA > Settings.mouse_min_movement;
 
     }
 
-	private void set_likely_current_input_type()
+	private void SetLikelyCurrentInputType()
 	{
         // Set input type to what's likely being used currently
         if( Input.GetConnectedJoypads().Count == 0 )
 		{
-            _set_last_input_type(InputType.KEYBOARD_MOUSE, -1);
+            SetLastInputType(EInputType.KEYBOARD_MOUSE, -1);
         }
 		else
 		{
-            _set_last_input_type(InputType.CONTROLLER, Input.GetConnectedJoypads().First());
+            SetLastInputType(EInputType.CONTROLLER, Input.GetConnectedJoypads().First());
         }
 	}
 
@@ -264,79 +264,79 @@ public partial class ControllerIcons : Node
         _t += (float)delta;
 		if( setLikelyInput )
 		{
-            set_likely_current_input_type();
+            SetLikelyCurrentInputType();
             setLikelyInput = false;
         }
 
-        if( _cached_callables.Count > 0 && _cached_callables_lock.TryLock() )
+        if( _CachedCallables.Count > 0 && _CachedCallablesLock.TryLock() )
 		{
 			// UPGRADE: In Godot 4.2, for-loop variables can be
 			// statically typed:
 			// for f: Callable in _cached_callables:
-			foreach( Callable f in _cached_callables )
+			foreach( Callable f in _CachedCallables )
 			{
 				if( f.Target != null && f.Delegate != null ) 
 					f.Call();
 			}
 		}
 
-        _cached_callables.Clear();
-        _cached_callables_lock.Unlock();
+        _CachedCallables.Clear();
+        _CachedCallablesLock.Unlock();
     }
 
-	private void _add_custom_input_action( string input_action , Godot.Collections.Array<InputEvent> events )
+	private void AddCustomInputAction( string input_action , Godot.Collections.Array<InputEvent> events )
 	{
-        _custom_input_actions[input_action] = events;
+        CustomInputActions[input_action] = events;
     }
 
 	private void refresh()
 	{
 		// All it takes is to signal icons to refresh paths
-        EmitSignalInputTypeChanged(_last_input_type, _last_controller);
+        EmitSignalInputTypeChanged(LastInputType, LastController);
     }
 
-	private ControllerSettings.Devices get_joypad_type( int controller = int.MinValue )
+	private ControllerSettings.Devices GetJoypadType( int controller = int.MinValue )
 	{
 		if( controller == int.MinValue )
 		{
-            controller = _last_controller;
+            controller = LastController;
         }
 
-        return _mapper._get_joypad_type(controller, _settings.joypad_fallback);
+        return Mapper.GetJoypadType(controller, Settings.joypad_fallback);
     }
 
-	public Texture2D parse_path( string path, InputType? input_type = InputType.NONE, int last_controller = int.MinValue, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE )
+	public Texture2D ParsePath( string path, EInputType? inputType = EInputType.NONE, int lastController = int.MinValue, ControllerSettings.Devices forcedControllerIconStyle = ControllerSettings.Devices.NONE )
 	{		
-		if( input_type == null )
+		if( inputType == null )
 		{
 			return null;
 		}
 
-		if( input_type == InputType.NONE )
+		if( inputType == EInputType.NONE )
 		{
-            input_type = _last_input_type;
+            inputType = LastInputType;
         }
 
-		if( last_controller == int.MinValue )
+		if( lastController == int.MinValue )
 		{
-            last_controller = _last_controller;
+            lastController = LastController;
         }
 
-        List<string> root_paths = _expand_path(path, input_type.Value, last_controller, forced_controller_icon_style);
+        List<string> root_paths = ExpandPath(path, inputType.Value, lastController, forcedControllerIconStyle);
         foreach( string root_path in root_paths )
 		{
-			if( _load_icon(root_path) != Error.Ok )
+			if( LoadIcon(root_path) != Error.Ok )
 			{
 				continue;
 			}
 
-            return _cached_icons[root_path];
+            return _CachedIcons[root_path];
 		}
 
         return null;
     }
 
-	public List<Texture2D> parse_event_modifiers(InputEvent e )
+	public List<Texture2D> ParseEventModifiers(InputEvent e )
 	{
 		if( e == null || e is not InputEventWithModifiers )
 			return [];
@@ -388,11 +388,11 @@ public partial class ControllerIcons : Node
 
 		foreach( string modifier in modifiers )
 		{
-			foreach( string icon_path in _expand_path(modifier, InputType.KEYBOARD_MOUSE, -1) )
+			foreach( string iconPath in ExpandPath(modifier, EInputType.KEYBOARD_MOUSE, -1) )
 			{
-				if( _load_icon( icon_path ) == Error.Ok )
+				if( LoadIcon( iconPath ) == Error.Ok )
 				{
-					icons.Add( _cached_icons[icon_path] );
+					icons.Add( _CachedIcons[iconPath] );
 				}
 			}
 		}
@@ -400,75 +400,75 @@ public partial class ControllerIcons : Node
         return icons;
     }
 
-	public string parse_path_to_tts(string path, InputType? input_type = InputType.NONE, int controller = int.MinValue)
+	public string ParsePathToTTS(string path, EInputType? input_type = EInputType.NONE, int controller = int.MinValue)
 	{
 		if( input_type == null )
             return "";
 
-		if( input_type == InputType.NONE )
+		if( input_type == EInputType.NONE )
 		{
-            input_type = _last_input_type;
+            input_type = LastInputType;
         }
 
 		if( controller == int.MinValue )
 		{
-            controller = _last_controller;
+            controller = LastController;
         }
 
-        var tts = _convert_path_to_asset_file(path, input_type.Value, controller);
-        return _convert_asset_file_to_tts(tts.GetBaseName().GetFile());
+        var tts = ConvertPathToAssetFile(path, input_type.Value, controller);
+        return ConvertAssetFileToTTS(tts.GetBaseName().GetFile());
     }
 
-	private Texture parse_event( InputEvent e )
+	private Texture ParseEvent( InputEvent e )
 	{
-		string path = _convert_event_to_path( e );
+		string path = ConvertEventToPath( e );
 		if( string.IsNullOrWhiteSpace(path) )
 			return null;
 
-		List<string> base_paths = [
-			_settings.custom_asset_dir + "/",
+		List<string> basePaths = [
+			Settings.custom_asset_dir + "/",
 			"res://addons/controller_icons/assets/"
 		];
 
-		foreach( string base_path in base_paths )
+		foreach( string basePath in basePaths )
 		{
-			if( string.IsNullOrWhiteSpace(base_path) )
+			if( string.IsNullOrWhiteSpace(basePath) )
 				continue;
 
-			string dictPath = base_path + path + "." + _base_extension;
-			if( _load_icon(dictPath) != Error.Ok )
+			string dictPath = basePath + path + "." + BaseExtension;
+			if( LoadIcon(dictPath) != Error.Ok )
 				continue;
 
-			return _cached_icons[dictPath];
+			return _CachedIcons[dictPath];
 		}
 
         return null;
     }
 
-    public PathType get_path_type(string path)
+    public EPathType GetPathType(string path)
     {
-        if (_custom_input_actions.ContainsKey(path) || InputMap.HasAction(path))
-            return PathType.INPUT_ACTION;
+        if (CustomInputActions.ContainsKey(path) || InputMap.HasAction(path))
+            return EPathType.INPUT_ACTION;
         else if( path.Split("/")[0] == "joypad" )
-			return PathType.JOYPAD_PATH;
+			return EPathType.JOYPAD_PATH;
 		else
-			return PathType.SPECIFIC_PATH;
+			return EPathType.SPECIFIC_PATH;
     }
 
-    public InputEvent get_matching_event( string path, InputType input_type = InputType.NONE, long controller = int.MinValue )
+    public InputEvent GetMatchingEvent( string path, EInputType inputType = EInputType.NONE, long controller = int.MinValue )
 	{
-		if( input_type == InputType.NONE )
+		if( inputType == EInputType.NONE )
 		{
-            input_type = _last_input_type;
+            inputType = LastInputType;
         }
 		
 		if( controller == int.MinValue )
 		{
-            controller = _last_controller;
+            controller = LastController;
         }
 
 		Godot.Collections.Array<InputEvent> events;
-		if( _custom_input_actions.TryGetValue(path, out Godot.Collections.Array<InputEvent> value) )
+		if( CustomInputActions.TryGetValue(path, out Godot.Collections.Array<InputEvent> value) )
 			events = value;
 		else
 			events = InputMap.ActionGetEvents(path);
@@ -484,12 +484,12 @@ public partial class ControllerIcons : Node
 				case "InputEventMouse":
 				case "InputEventMouseMotion":
 				case "InputEventMouseButton":
-					if( input_type == InputType.KEYBOARD_MOUSE )
+					if( inputType == EInputType.KEYBOARD_MOUSE )
 						return inputEvent;
                     break;
                 case "InputEventJoypadButton":
 				case "InputEventJoypadMotion":
-					if( input_type == InputType.CONTROLLER )
+					if( inputType == EInputType.CONTROLLER )
 					{
 						// Use the first device specific mapping if there is one.
 						if( inputEvent.Device == controller )
@@ -507,43 +507,43 @@ public partial class ControllerIcons : Node
 		return fallbacks.Count > 0 ? fallbacks[0] : null;
     }
 
-	private List<string> _expand_path(string path, InputType input_type, int controller, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE)
+	private List<string> ExpandPath(string path, EInputType inputType, int controller, ControllerSettings.Devices forceControllerIconStyle = ControllerSettings.Devices.NONE)
 	{
 		List<string> paths = [];
-		List<string> base_paths = [
-			_settings.custom_asset_dir + "/",
+		List<string> basePaths = [
+			Settings.custom_asset_dir + "/",
 			"res://addons/controller_icons/assets/"
 		];
-		foreach( string base_path in base_paths )
+		foreach( string basePath in basePaths )
 		{
-			if( string.IsNullOrWhiteSpace(base_path) )
+			if( string.IsNullOrWhiteSpace(basePath) )
 				continue;
-			string asset_path = base_path + _convert_path_to_asset_file(path, input_type, controller, forced_controller_icon_style);
+			string asset_path = basePath + ConvertPathToAssetFile(path, inputType, controller, forceControllerIconStyle);
 
-			paths.Add(asset_path + "." + _base_extension);
+			paths.Add(asset_path + "." + BaseExtension);
 		}
 
         return paths;
     }
 
-	private string _convert_path_to_asset_file( string path, InputType input_type, int controller, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE )
+	private string ConvertPathToAssetFile( string path, EInputType inputType, int controller, ControllerSettings.Devices forceControllerIconStyle = ControllerSettings.Devices.NONE )
 	{
-		switch( (PathType)get_path_type(path) )
+		switch( (EPathType)GetPathType(path) )
 		{
-			case PathType.INPUT_ACTION:
-                InputEvent e = get_matching_event(path, input_type, controller);
+			case EPathType.INPUT_ACTION:
+                InputEvent e = GetMatchingEvent(path, inputType, controller);
                 if( e != null)
-                    return _convert_event_to_path(e, controller, forced_controller_icon_style);
+                    return ConvertEventToPath(e, controller, forceControllerIconStyle);
                 return path;
-			case PathType.JOYPAD_PATH:
-				return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback, forced_controller_icon_style);
-            case PathType.SPECIFIC_PATH:
+			case EPathType.JOYPAD_PATH:
+				return Mapper.ConvertJoypadPath(path, controller, Settings.joypad_fallback, forceControllerIconStyle);
+            case EPathType.SPECIFIC_PATH:
 			default:
 				return path;
 		}
 	}
 
-	private static string _convert_asset_file_to_tts( string path )
+	private static string ConvertAssetFileToTTS( string path )
 	{
         return path switch
         {
@@ -576,31 +576,31 @@ public partial class ControllerIcons : Node
         };
     }
 
-	private string _convert_event_to_path( InputEvent e, int controller = int.MinValue, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE )
+	private string ConvertEventToPath( InputEvent e, int controller = int.MinValue, ControllerSettings.Devices forcedControllerIconStyle = ControllerSettings.Devices.NONE )
 	{
         if( controller == int.MinValue )
         {
-            controller = _last_controller;
+            controller = LastController;
         }
 
 		if( e is InputEventKey keyEvent )
 		{
             // If this is a physical key, convert to localized scancode
             if( keyEvent.Keycode == 0 )
-				return _convert_key_to_path(DisplayServer.KeyboardGetKeycodeFromPhysical(keyEvent.PhysicalKeycode));
-			return _convert_key_to_path(keyEvent.Keycode);
+				return ConvertKeyToPath(DisplayServer.KeyboardGetKeycodeFromPhysical(keyEvent.PhysicalKeycode));
+			return ConvertKeyToPath(keyEvent.Keycode);
 		}
 		else if( e is InputEventMouseButton mouseEvent )
-			return _convert_mouse_button_to_path(mouseEvent.ButtonIndex);
+			return ConvertMouseButtonToPath(mouseEvent.ButtonIndex);
 		else if( e is InputEventJoypadButton joypadButtonEvent )
-			return _convert_joypad_button_to_path(joypadButtonEvent.ButtonIndex, controller, forced_controller_icon_style);
+			return ConvertJoypadButtonToPath(joypadButtonEvent.ButtonIndex, controller, forcedControllerIconStyle);
 		else if( e is InputEventJoypadMotion joypadMotionEvent )
-			return _convert_joypad_motion_to_path(joypadMotionEvent.Axis, controller, forced_controller_icon_style);
+			return ConvertJoypadMotionToPath(joypadMotionEvent.Axis, controller, forcedControllerIconStyle);
 
 		return "";
     }
 
-	private static string _convert_key_to_path( Key keycode )
+	private static string ConvertKeyToPath( Key keycode )
 	{
         return keycode switch
         {
@@ -713,7 +713,7 @@ public partial class ControllerIcons : Node
         };
     }
 
-	private static string _convert_mouse_button_to_path( MouseButton button )
+	private static string ConvertMouseButtonToPath( MouseButton button )
 	{
         return button switch
         {
@@ -728,7 +728,7 @@ public partial class ControllerIcons : Node
         };
     }
 
-	private string _convert_joypad_button_to_path( JoyButton button , int controller, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE )
+	private string ConvertJoypadButtonToPath( JoyButton button , int controller, ControllerSettings.Devices forcedControllerIconStyle = ControllerSettings.Devices.NONE )
 	{
         string path;
         switch( button )
@@ -785,10 +785,10 @@ public partial class ControllerIcons : Node
         		return "";
 		};
 
-        return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback, forced_controller_icon_style);
+        return Mapper.ConvertJoypadPath(path, controller, Settings.joypad_fallback, forcedControllerIconStyle);
     }
 
-    private string _convert_joypad_motion_to_path(JoyAxis axis, int controller, ControllerSettings.Devices forced_controller_icon_style = ControllerSettings.Devices.NONE)
+    private string ConvertJoypadMotionToPath(JoyAxis axis, int controller, ControllerSettings.Devices forcedControllerIconStyle = ControllerSettings.Devices.NONE)
     {
         string path;
 		switch( axis )
@@ -811,12 +811,12 @@ public partial class ControllerIcons : Node
 				return "";
 		}
 
-        return _mapper._convert_joypad_path(path, controller, _settings.joypad_fallback, forced_controller_icon_style);
+        return Mapper.ConvertJoypadPath(path, controller, Settings.joypad_fallback, forcedControllerIconStyle);
     }
 
-    private Error _load_icon( string path )
+    private Error LoadIcon( string path )
 	{
-		if( _cached_icons.ContainsKey(path) ) return Error.Ok;
+		if( _CachedIcons.ContainsKey(path) ) return Error.Ok;
 
 		Texture2D tex;
 		if( path.StartsWith("res://") )
@@ -841,15 +841,15 @@ public partial class ControllerIcons : Node
 				return err;
 			tex = ImageTexture.CreateFromImage(img);			
 		}
-		_cached_icons[path] = tex;
+		_CachedIcons[path] = tex;
 
         return Error.Ok;
     }
 
-	public void _defer_texture_load( Callable f )
+	public void DeferTextureLoad( Callable f )
 	{
-        _cached_callables_lock.Lock();
-        _cached_callables.Add(f);
-        _cached_callables_lock.Unlock();
+        _CachedCallablesLock.Lock();
+        _CachedCallables.Add(f);
+        _CachedCallablesLock.Unlock();
     }
 }	

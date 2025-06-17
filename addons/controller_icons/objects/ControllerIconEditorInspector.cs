@@ -7,58 +7,60 @@ using static ControllerIcons;
 [Tool]
 public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 {
-    public EditorInterface editor_interface;
+    public EditorInterface EditorInterface;
 	private ControllerIcons_TexturePreview preview;
 
 	class ControllerIcons_TexturePreview
 	{
-        private MarginContainer n_root;
-        private TextureRect n_background;
-        private TextureRect n_texture;
-        private Texture2D background;
+        private MarginContainer nRoot;
+        private TextureRect nBackground;
+        private TextureRect nIconTexture;
+        private Texture2D BackgroundTexture;
 
-        public Texture2D texture
+        public Texture2D Texture
 		{
-            get { return _texture;  }
+            get { return _Texture;  }
 			set
 			{
-                _texture = value;
-                n_texture.Texture = _texture;
+                _Texture = value;
+                nIconTexture.Texture = _Texture;
             }
         }
-        private Texture2D _texture;
+        private Texture2D _Texture;
 
-        public ControllerIcons_TexturePreview(EditorInterface editor_interface)
+        public ControllerIcons_TexturePreview(EditorInterface editorInterface)
 		{
-			n_root = new();
+			nRoot = new();
 
 			// UPGRADE: In Godot 4.2, there's no need to have an instance to
 			// EditorInterface, since it's now a static call:
 			// background = EditorInterface.get_base_control().get_theme_icon("Checkerboard", "EditorIcons")
-			background = editor_interface.GetBaseControl().GetThemeIcon("Checkerboard", "EditorIcons");
+			BackgroundTexture = editorInterface.GetBaseControl().GetThemeIcon("Checkerboard", "EditorIcons");
 
-			n_background = new ();
-            n_background.StretchMode = TextureRect.StretchModeEnum.Tile;
-            n_background.Texture = background;
+            nBackground = new()
+            {
+                StretchMode = TextureRect.StretchModeEnum.Tile,
+                Texture = BackgroundTexture,
+                TextureRepeat = CanvasItem.TextureRepeatEnum.Enabled,
+                CustomMinimumSize = new Vector2(0, 256)
+            };
 
-            n_background.TextureRepeat = CanvasItem.TextureRepeatEnum.Enabled;
-            n_background.CustomMinimumSize = new Vector2(0, 256);
+            nRoot.AddChild(nBackground);
 
-			n_root.AddChild(n_background);
+            nIconTexture = new()
+            {
+                TextureFilter = CanvasItem.TextureFilterEnum.NearestWithMipmaps
+            };
+            nIconTexture.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+			nIconTexture.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
+			nIconTexture.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
 
-			n_texture = new();
-			n_texture.TextureFilter = CanvasItem.TextureFilterEnum.NearestWithMipmaps;
-			n_texture.SetAnchorsPreset(Control.LayoutPreset.FullRect);
-			n_texture.StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered;
-
-			n_texture.ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize;
-
-			n_root.AddChild(n_texture);
+			nRoot.AddChild(nIconTexture);
 		}
 
 		public Control get_root()
 		{
-			return n_root;
+			return nRoot;
 		}
     }
 
@@ -69,18 +71,18 @@ public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 
 	public override void _ParseBegin( GodotObject obj )
 	{
-        preview = new(editor_interface);
+        preview = new(EditorInterface);
         AddCustomControl(preview.get_root());
 
         if( obj is ControllerIconTexture icon )
-			preview.texture = icon;
+			preview.Texture = icon;
     }
 
 	public override bool _ParseProperty( GodotObject obj, Variant.Type type, string name, PropertyHint hint_type, string hint_string, PropertyUsageFlags usage_flags, bool wide )
 	{
 		if( name == "path" )
 		{
-            ControllerIconPathEditorProperty path_selector_instance = new( editor_interface );
+            ControllerIconPathEditorProperty path_selector_instance = new( EditorInterface );
 			AddPropertyEditor(name, path_selector_instance);
 			return true;
 		}

@@ -8,28 +8,28 @@ public partial class ControllerIconPathSelectorPopup : ConfirmationDialog
     [Signal]
     public delegate void PathSelectedEventHandler(string path);
 
-    public EditorInterface editor_interface;
+    public EditorInterface EditorInterface;
 
-    private ControllerIconPathSelector n_selector;
+    private ControllerIconPathSelector nSelector;
 
 	public override void _Ready()
 	{
-		n_selector = GetNode<ControllerIconPathSelector>("ControllerIconPathSelector");
+		nSelector = GetNode<ControllerIconPathSelector>("ControllerIconPathSelector");
     }
 
-	public void populate()
+	public void Populate()
 	{
-        n_selector.populate(editor_interface);
+        nSelector.populate(EditorInterface);
     }
 
-	private void _on_controller_icon_path_selector_path_selected( string path )
+	private void OnControllerIconPathSelectorPathSelected( string path )
 	{
         EmitSignalPathSelected(path);
         Hide();
     }
 
-	private void _on_confirmed()
+	private void OnConfirmed()
 	{
-        EmitSignalPathSelected(n_selector.get_icon_path());
+        EmitSignalPathSelected(nSelector.GetIconPath());
 	}
 }

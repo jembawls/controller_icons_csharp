@@ -6,7 +6,7 @@ using System.Linq;
 [Tool]
 public partial class ControllerIconPlugin : EditorPlugin
 {
-    private ControllerIconEditorInspector inspector_plugin;
+    private ControllerIconEditorInspector inspectorPlugin;
 
     public override void _EnablePlugin()
 	{
@@ -20,16 +20,16 @@ public partial class ControllerIconPlugin : EditorPlugin
 
 	public override void _EnterTree()
 	{
-        inspector_plugin = new()
+        inspectorPlugin = new()
         {
-            editor_interface = EditorInterface.Singleton
+            EditorInterface = EditorInterface.Singleton
         };
 
-        AddInspectorPlugin(inspector_plugin);
+        AddInspectorPlugin(inspectorPlugin);
     }
 
 	public override void _ExitTree()
 	{
-        RemoveInspectorPlugin(inspector_plugin);
+        RemoveInspectorPlugin(inspectorPlugin);
     }
 }

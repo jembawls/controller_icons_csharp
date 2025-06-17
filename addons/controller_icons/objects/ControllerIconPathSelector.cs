@@ -8,102 +8,102 @@ public partial class ControllerIconPathSelector : PanelContainer
     [Signal]
     public delegate void PathSelectedEventHandler(string path);
 
-    private TabContainer n_tab_container;
-    private InputActionSelector n_input_action;
-    private JoypadPathSelector n_joypad_path;
-    private SpecificPathSelector n_specific_path;
+    private TabContainer nTabContainer;
+    private InputActionSelector nInputAction;
+    private JoypadPathSelector nJoypadPath;
+    private SpecificPathSelector nSpecificPath;
 
-    private bool input_action_populated = false;
-    private bool joypad_path_populated = false;
-    private bool specific_path_populated = false;
+    private bool InputActionPopulated = false;
+    private bool JoypadPathPopulated = false;
+    private bool SpecificPathPopulated = false;
 
-    public EditorInterface editor_interface;	
+    public EditorInterface EditorInterface;	
 
 	public override void _Ready()
 	{
-        n_tab_container = GetNode<TabContainer>("%TabContainer");
-        n_input_action = GetNode<InputActionSelector>("%Input Action");
-		n_joypad_path = GetNode<JoypadPathSelector>("%Joypad Path");
-		n_specific_path = GetNode<SpecificPathSelector>("%Specific Path");
+        nTabContainer = GetNode<TabContainer>("%TabContainer");
+        nInputAction = GetNode<InputActionSelector>("%Input Action");
+		nJoypadPath = GetNode<JoypadPathSelector>("%Joypad Path");
+		nSpecificPath = GetNode<SpecificPathSelector>("%Specific Path");
     }
 
-    public void populate( EditorInterface editor_interface )
+    public void populate( EditorInterface editorInterface )
 	{
-        this.editor_interface = editor_interface;
-        input_action_populated = false;
-        joypad_path_populated = false;
-        specific_path_populated = false;
-        n_tab_container.CurrentTab = 0;
+        this.EditorInterface = editorInterface;
+        InputActionPopulated = false;
+        JoypadPathPopulated = false;
+        SpecificPathPopulated = false;
+        nTabContainer.CurrentTab = 0;
     }
 
-	public string get_icon_path()
+	public string GetIconPath()
 	{
-		if( n_tab_container.GetCurrentTabControl() is InputActionSelector ia )
+		if( nTabContainer.GetCurrentTabControl() is InputActionSelector ia )
 		{
-            return ia.get_icon_path();
+            return ia.GetIconPath();
         }
-		else if( n_tab_container.GetCurrentTabControl() is JoypadPathSelector jp )
+		else if( nTabContainer.GetCurrentTabControl() is JoypadPathSelector jp )
 		{
-            return jp.get_icon_path();
+            return jp.GetIconPath();
         }
-		else if( n_tab_container.GetCurrentTabControl() is SpecificPathSelector sp )
+		else if( nTabContainer.GetCurrentTabControl() is SpecificPathSelector sp )
 		{
-            return sp.get_icon_path();
+            return sp.GetIconPath();
         }
 
         return "";
     }
 
-	private async void _on_tab_container_tab_selected( int tab )
+	private async void OnTabContainerTabSelected( int tab )
 	{
 		// if the tab container's default tab has a non-default value set in the tscn file
 		// (ie. there is a "current_tab" value set at all, even if it is 0)
 		// then this signal may get called even before _Ready() is called
 		// Therefore we need to check that stuff has been setup first.
 		// Ideally: Don't touch the tab container.
-		if( n_tab_container == null || editor_interface == null ) return;
+		if( nTabContainer == null || EditorInterface == null ) return;
 
-        if( n_tab_container.GetCurrentTabControl() == n_input_action )
+        if( nTabContainer.GetCurrentTabControl() == nInputAction )
 		{
-			if( !input_action_populated )
+			if( !InputActionPopulated )
 			{
-				input_action_populated = true;
-				n_input_action.populate(editor_interface);
+				InputActionPopulated = true;
+				nInputAction.Populate(EditorInterface);
 			}
 		}
-		else if( n_tab_container.GetCurrentTabControl() == n_joypad_path )
+		else if( nTabContainer.GetCurrentTabControl() == nJoypadPath )
 		{
-			if( !joypad_path_populated )
+			if( !JoypadPathPopulated )
 			{
-                joypad_path_populated = true;
-                n_joypad_path.populate(editor_interface);
+                JoypadPathPopulated = true;
+                nJoypadPath.Populate(EditorInterface);
             }
 		}
-		else if( n_tab_container.GetCurrentTabControl() == n_specific_path )
+		else if( nTabContainer.GetCurrentTabControl() == nSpecificPath )
 		{
-			if( !specific_path_populated )
+			if( !SpecificPathPopulated )
 			{
-				specific_path_populated = true;
-				n_specific_path.populate(editor_interface);
+				SpecificPathPopulated = true;
+				nSpecificPath.Populate(EditorInterface);
 			}			
 		}
 
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-        n_tab_container.GetCurrentTabControl().GrabFocus();
+        nTabContainer.GetCurrentTabControl().GrabFocus();
     }
 
-	private void _on_input_action_done()
+	private void OnInputActionDone()
 	{
-		EmitSignalPathSelected(n_input_action.get_icon_path());
+		EmitSignalPathSelected(nInputAction.GetIconPath());
     }
 
-	private void _on_joypad_path_done()
+	private void OnJoypadPathDone()
 	{
-		EmitSignalPathSelected(n_joypad_path.get_icon_path());
+		EmitSignalPathSelected(nJoypadPath.GetIconPath());
     }
 
-	private void _on_specific_path_done()
+	private void OnSpecificPathDone()
 	{
-		EmitSignalPathSelected(n_specific_path.get_icon_path());
+		EmitSignalPathSelected(nSpecificPath.GetIconPath());
     }
 }

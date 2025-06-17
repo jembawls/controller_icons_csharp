@@ -10,16 +10,16 @@ public partial class JoypadPathSelector : Panel
 	[Signal]
 	private delegate void DoneEventHandler();
 
-    private Label n_button_label;
-    private Godot.Collections.Array<Button> button_nodes;
+    private Label ButtonLabel;
+    private Godot.Collections.Array<Button> ButtonNodes;
 
-    private Button _last_pressed_button;
-    private ulong _last_pressed_timestamp;
+    private Button LastPressedButton;
+    private ulong LastPressedTimestamp;
 
     public override void _Ready()
 	{
-        n_button_label = GetNode<Label>("%ButtonLabel");
-        button_nodes = [
+        ButtonLabel = GetNode<Label>("%ButtonLabel");
+        ButtonNodes = [
 			GetNode<Button>("%LT"), GetNode<Button>("%RT"),
 			GetNode<Button>("%LStick"), GetNode<Button>("%RStick"),
 			GetNode<Button>("%LStickClick"), GetNode<Button>("%RStickClick"),
@@ -31,21 +31,21 @@ public partial class JoypadPathSelector : Panel
 		];	
     }
 
-    public void populate( EditorInterface editor_interface )
+    public void Populate( EditorInterface editorInterface )
 	{
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for button:Button in button_nodes:
-		foreach( Button button in button_nodes )
+		foreach( Button button in ButtonNodes )
             button.ButtonPressed = false;
     }
 
-	public string get_icon_path()
+	public string GetIconPath()
 	{
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for button:Button in button_nodes:
-		foreach( Button button in button_nodes )
+		foreach( Button button in ButtonNodes )
 		{
 			if( button.ButtonPressed )
 				return ( button.Icon as ControllerIconTexture ).path;
@@ -54,7 +54,7 @@ public partial class JoypadPathSelector : Panel
 		return "";
 	}
 
-	public void grab_focus()
+	public void GrabFocus()
 	{
 		//do nothing
 	}
@@ -64,12 +64,12 @@ public partial class JoypadPathSelector : Panel
 		if( !Visible ) return;
 
 		if( e is InputEventJoypadMotion motionEvent )
-			_input_motion(motionEvent);
+			InputMotion(motionEvent);
 		else if( e is InputEventJoypadButton buttonEvent )
-			_input_button(buttonEvent);
+			InputButton(buttonEvent);
 	}
 
-	private void _input_motion(InputEventJoypadMotion e )
+	private void InputMotion(InputEventJoypadMotion e )
 	{
 		if( Mathf.Abs(e.AxisValue) < 0.5f ) return;
 
@@ -77,80 +77,80 @@ public partial class JoypadPathSelector : Panel
 		{
 			case JoyAxis.LeftX:
 			case JoyAxis.LeftY:
-				_simulate_button_press(GetNode<Button>("%LStick"));
+				SimulateButtonPress(GetNode<Button>("%LStick"));
 				break;
 			case JoyAxis.RightX:
 			case JoyAxis.RightY:
-				_simulate_button_press(GetNode<Button>("%RStick"));
+				SimulateButtonPress(GetNode<Button>("%RStick"));
 				break;
 			case JoyAxis.TriggerLeft:
-				_simulate_button_press(GetNode<Button>("%LT"));
+				SimulateButtonPress(GetNode<Button>("%LT"));
 				break;
 			case JoyAxis.TriggerRight:
-				_simulate_button_press(GetNode<Button>("%RT"));
+				SimulateButtonPress(GetNode<Button>("%RT"));
 				break;
 		}
 	}
 
-	private void _input_button( InputEventJoypadButton e )
+	private void InputButton( InputEventJoypadButton e )
 	{
 		if( !e.Pressed ) return;
 
 		switch( e.ButtonIndex )
 		{
 			case JoyButton.A:
-				_simulate_button_press(GetNode<Button>("%A"));
+				SimulateButtonPress(GetNode<Button>("%A"));
 				break;
 			case JoyButton.B:
-				_simulate_button_press(GetNode<Button>("%B"));
+				SimulateButtonPress(GetNode<Button>("%B"));
 				break;
 			case JoyButton.X:
-				_simulate_button_press(GetNode<Button>("%X"));
+				SimulateButtonPress(GetNode<Button>("%X"));
 				break;
 			case JoyButton.Y:
-				_simulate_button_press(GetNode<Button>("%Y"));
+				SimulateButtonPress(GetNode<Button>("%Y"));
 				break;
 			case JoyButton.LeftShoulder:
-				_simulate_button_press(GetNode<Button>("%LB"));
+				SimulateButtonPress(GetNode<Button>("%LB"));
 				break;
 			case JoyButton.RightShoulder:
-				_simulate_button_press(GetNode<Button>("%RB"));
+				SimulateButtonPress(GetNode<Button>("%RB"));
 				break;
 			case JoyButton.LeftStick:
-				_simulate_button_press(GetNode<Button>("%LStickClick"));
+				SimulateButtonPress(GetNode<Button>("%LStickClick"));
 				break;
 			case JoyButton.RightStick:
-				_simulate_button_press(GetNode<Button>("%RStickClick"));
+				SimulateButtonPress(GetNode<Button>("%RStickClick"));
 				break;
 			case JoyButton.DpadDown:
-				_simulate_button_press(GetNode<Button>("%DPADDown"));
+				SimulateButtonPress(GetNode<Button>("%DPADDown"));
 				break;
 			case JoyButton.DpadRight:
-				_simulate_button_press(GetNode<Button>("%DPADRight"));
+				SimulateButtonPress(GetNode<Button>("%DPADRight"));
 				break;
 			case JoyButton.DpadLeft:
-				_simulate_button_press(GetNode<Button>("%DPADLeft"));
+				SimulateButtonPress(GetNode<Button>("%DPADLeft"));
 				break;
 			case JoyButton.DpadUp:
-				_simulate_button_press(GetNode<Button>("%DPADUp"));
+				SimulateButtonPress(GetNode<Button>("%DPADUp"));
 				break;
 			case JoyButton.Back:
-				_simulate_button_press(GetNode<Button>("%Select"));
+				SimulateButtonPress(GetNode<Button>("%Select"));
 				break;
 			case JoyButton.Start:
-				_simulate_button_press(GetNode<Button>("%Start"));
+				SimulateButtonPress(GetNode<Button>("%Start"));
 				break;
 			case JoyButton.Guide:
-				_simulate_button_press(GetNode<Button>("%Home"));
+				SimulateButtonPress(GetNode<Button>("%Home"));
 				break;
 			case JoyButton.Misc1:
-				_simulate_button_press(GetNode<Button>("%Share"));
+				SimulateButtonPress(GetNode<Button>("%Share"));
 				break;		
 		}
 
 	}
 
-	private void _simulate_button_press( Button button )
+	private void SimulateButtonPress( Button button )
 	{
 		button.GrabFocus();
 		button.ButtonPressed = true;
@@ -160,28 +160,28 @@ public partial class JoypadPathSelector : Panel
 		button.SetMeta("from_ui", true);
 	}
 
-	private void _on_button_pressed()
+	private void OnButtonPressed()
 	{
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for button:Button in button_nodes:
-		foreach( Button button in button_nodes )
+		foreach( Button button in ButtonNodes )
 		{
 			if( button.HasMeta("from_ui") && (bool)button.GetMeta("from_ui", true) == false ) return;
 
 			if( button.ButtonPressed )
 			{
-				if( _last_pressed_button == button )
+				if( LastPressedButton == button )
 				{
-					if( Time.GetTicksMsec() < _last_pressed_timestamp )
+					if( Time.GetTicksMsec() < LastPressedTimestamp )
 						EmitSignalDone();
 					else
-						_last_pressed_timestamp = Time.GetTicksMsec() + 1000;
+						LastPressedTimestamp = Time.GetTicksMsec() + 1000;
 				}
 				else
 				{
-					_last_pressed_button = button;
-					_last_pressed_timestamp = Time.GetTicksMsec() + 1000;
+					LastPressedButton = button;
+					LastPressedTimestamp = Time.GetTicksMsec() + 1000;
 				}
 			}
 
@@ -191,106 +191,106 @@ public partial class JoypadPathSelector : Panel
 
 	private void _on_l_stick_pressed()
 	{
-		n_button_label.Text = "Axis 0/1\n(Left Stick, Joystick 0)\n[joypad/l_stick]";
+		ButtonLabel.Text = "Axis 0/1\n(Left Stick, Joystick 0)\n[joypad/l_stick]";
 	}
 
 	private void _on_l_stick_click_pressed()
 	{
-		n_button_label.Text = "Button 7\n(Left Stick, Sony L3, Xbox L/LS)\n[joypad/l_stick_click]";
+		ButtonLabel.Text = "Button 7\n(Left Stick, Sony L3, Xbox L/LS)\n[joypad/l_stick_click]";
 	}
 	
 	private void _on_r_stick_pressed()
 	{
-		n_button_label.Text = "Axis 2/3\n(Right Stick, Joystick 1)\n[joypad/r_stick]";
+		ButtonLabel.Text = "Axis 2/3\n(Right Stick, Joystick 1)\n[joypad/r_stick]";
 	}
 	
 	private void _on_r_stick_click_pressed()
 	{
-		n_button_label.Text = "Button 8\n(Right Stick, Sony R3, Xbox R/RS)\n[joypad/r_stick_click]";
+		ButtonLabel.Text = "Button 8\n(Right Stick, Sony R3, Xbox R/RS)\n[joypad/r_stick_click]";
 	}
 	
 	private void _on_lb_pressed()
 	{
-		n_button_label.Text = "Button 9\n(Left Shoulder, Sony L1, Xbox LB)\n[joypad/lb]";
+		ButtonLabel.Text = "Button 9\n(Left Shoulder, Sony L1, Xbox LB)\n[joypad/lb]";
 	}
 	
 	private void _on_lt_pressed()
 	{
-		n_button_label.Text = "Axis 4\n(Left Trigger, Sony L2, Xbox LT, Joystick 2 Right)\n[joypad/lt]";
+		ButtonLabel.Text = "Axis 4\n(Left Trigger, Sony L2, Xbox LT, Joystick 2 Right)\n[joypad/lt]";
 	}
 	
 	private void _on_rb_pressed()
 	{
-		n_button_label.Text = "Button 10\n(Right Shoulder, Sony R1, Xbox RB)\n[joypad/rb]";
+		ButtonLabel.Text = "Button 10\n(Right Shoulder, Sony R1, Xbox RB)\n[joypad/rb]";
 	}
 	
 	private void _on_rt_pressed()
 	{
-		n_button_label.Text = "Axis 5\n(Right Trigger, Sony R2, Xbox RT, Joystick 2 Down)\n[joypad/rt]";
+		ButtonLabel.Text = "Axis 5\n(Right Trigger, Sony R2, Xbox RT, Joystick 2 Down)\n[joypad/rt]";
 	}
 	
 	private void _on_a_pressed()
 	{
-		n_button_label.Text = "Button 0\n(Bottom Action, Sony Cross, Xbox A, Nintendo B)\n[joypad/a]";
+		ButtonLabel.Text = "Button 0\n(Bottom Action, Sony Cross, Xbox A, Nintendo B)\n[joypad/a]";
 	}
 	
 	private void _on_b_pressed()
 	{
-		n_button_label.Text = "Button 1\n(Right Action, Sony Circle, Xbox B, Nintendo A)\n[joypad/b]";
+		ButtonLabel.Text = "Button 1\n(Right Action, Sony Circle, Xbox B, Nintendo A)\n[joypad/b]";
 	}
 	
 	private void _on_x_pressed()
 	{
-		n_button_label.Text = "Button 2\n(Left Action, Sony Square, Xbox X, Nintendo Y)\n[joypad/x]";
+		ButtonLabel.Text = "Button 2\n(Left Action, Sony Square, Xbox X, Nintendo Y)\n[joypad/x]";
 	}
 	
 	private void _on_y_pressed()
 	{
-		n_button_label.Text = "Button 3\n(Top Action, Sony Triangle, Xbox Y, Nintendo X)\n[joypad/y]";
+		ButtonLabel.Text = "Button 3\n(Top Action, Sony Triangle, Xbox Y, Nintendo X)\n[joypad/y]";
 	}
 	
 	private void _on_select_pressed()
 	{
-		n_button_label.Text = "Button 4\n(Back, Sony Select, Xbox Back, Nintendo -)\n[joypad/select]";
+		ButtonLabel.Text = "Button 4\n(Back, Sony Select, Xbox Back, Nintendo -)\n[joypad/select]";
 	}
 	
 	private void _on_start_pressed()
 	{
-		n_button_label.Text = "Button 6\n(Start, Xbox Menu, Nintendo +)\n[joypad/start]";
+		ButtonLabel.Text = "Button 6\n(Start, Xbox Menu, Nintendo +)\n[joypad/start]";
 	}
 	
 	private void _on_home_pressed()
 	{
-		n_button_label.Text = "Button 5\n(Guide, Sony PS, Xbox Home)\n[joypad/home]";
+		ButtonLabel.Text = "Button 5\n(Guide, Sony PS, Xbox Home)\n[joypad/home]";
 	}
 	
 	private void _on_share_pressed()
 	{
-		n_button_label.Text = "Button 15\n(Xbox Share, PS5 Microphone, Nintendo Capture)\n[joypad/share]";
+		ButtonLabel.Text = "Button 15\n(Xbox Share, PS5 Microphone, Nintendo Capture)\n[joypad/share]";
 	}
 	
 	private void _on_dpad_pressed()
 	{
-		n_button_label.Text = "Button 11/12/13/14\n(D-pad)\n[joypad/dpad]";
+		ButtonLabel.Text = "Button 11/12/13/14\n(D-pad)\n[joypad/dpad]";
 	}
 	
 	private void _on_dpad_down_pressed()
 	{
-		n_button_label.Text = "Button 12\n(D-pad Down)\n[joypad/dpad_down]";
+		ButtonLabel.Text = "Button 12\n(D-pad Down)\n[joypad/dpad_down]";
 	}
 	
 	private void _on_dpad_right_pressed()
 	{
-		n_button_label.Text = "Button 14\n(D-pad Right)\n[joypad/dpad_right]";
+		ButtonLabel.Text = "Button 14\n(D-pad Right)\n[joypad/dpad_right]";
 	}
 	
 	private void _on_dpad_left_pressed()
 	{
-		n_button_label.Text = "Button 13\n(D-pad Left)\n[joypad/dpad_left]";
+		ButtonLabel.Text = "Button 13\n(D-pad Left)\n[joypad/dpad_left]";
 	}
 	
 	private void _on_dpad_up_pressed()
 	{
-		n_button_label.Text = "Button 11\n(D-pad Up)\n[joypad/dpad_up]";
+		ButtonLabel.Text = "Button 11\n(D-pad Up)\n[joypad/dpad_up]";
 	}
 }

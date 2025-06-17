@@ -63,5 +63,5 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[connection signal="text_changed" from="VBoxContainer/HBoxContainer/NameFilter" to="." method="_on_name_filter_text_changed"]
-[connection signal="item_selected" from="VBoxContainer/HSplitContainer/ScrollContainer/BaseAssetNames" to="." method="_on_base_asset_names_item_selected"]
+[connection signal="text_changed" from="VBoxContainer/HBoxContainer/NameFilter" to="." method="OnNameFilterTextChanged"]
+[connection signal="item_selected" from="VBoxContainer/HSplitContainer/ScrollContainer/BaseAssetNames" to="." method="OnBaseAssetNamesItemSelected"]

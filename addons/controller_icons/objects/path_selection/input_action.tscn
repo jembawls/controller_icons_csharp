@@ -2,16 +2,13 @@
 
 [ext_resource type="Script" path="res://addons/controller_icons/objects/path_selection/InputActionSelector.cs" id="1_shxks"]
 
-[node name="Input Action" type="Panel" node_paths=PackedStringArray("n_name_filter", "n_builtin_action_button", "n_tree")]
+[node name="Input Action" type="Panel"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_shxks")
-n_name_filter = NodePath("VBoxContainer/HBoxContainer/NameFilter")
-n_builtin_action_button = NodePath("VBoxContainer/HBoxContainer/BuiltinActionButton")
-n_tree = NodePath("VBoxContainer/ScrollContainer/Tree")
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -57,6 +54,6 @@ hide_root = true
 select_mode = 1
 scroll_horizontal_enabled = false
 
-[connection signal="text_changed" from="VBoxContainer/HBoxContainer/NameFilter" to="." method="_on_name_filter_text_changed"]
-[connection signal="toggled" from="VBoxContainer/HBoxContainer/BuiltinActionButton" to="." method="_on_builtin_action_button_toggled"]
-[connection signal="item_activated" from="VBoxContainer/ScrollContainer/Tree" to="." method="_on_tree_item_activated"]
+[connection signal="text_changed" from="VBoxContainer/HBoxContainer/NameFilter" to="." method="OnNameFilterTextChanged"]
+[connection signal="toggled" from="VBoxContainer/HBoxContainer/BuiltinActionButton" to="." method="OnBuiltInActionButtonToggled"]
+[connection signal="item_activated" from="VBoxContainer/ScrollContainer/Tree" to="." method="OnTreeItemActivated"]

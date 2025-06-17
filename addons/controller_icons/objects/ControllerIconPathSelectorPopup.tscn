@@ -18,4 +18,4 @@ offset_right = -8.0
 offset_bottom = -49.0
 
 [connection signal="confirmed" from="." to="." method="_on_confirmed"]
-[connection signal="PathSelected" from="ControllerIconPathSelector" to="." method="_on_controller_icon_path_selector_path_selected"]
+[connection signal="PathSelected" from="ControllerIconPathSelector" to="." method="OnControllerIconPathSelectorPathSelected"]

@@ -27,14 +27,14 @@ public partial class ControllerButton : Button
             _path = value;
 			if( IsInsideTree() )
 			{
-                Icon = CI.parse_path(path, force_type);
+                Icon = CI.ParsePath(path, force_type);
             }
         }
     }
     private string _path = "";
 
 	[Export]
-	public ShowMode show_only {
+	public EShowMode show_only {
 		get 
 		{
             return _show_only;
@@ -43,13 +43,13 @@ public partial class ControllerButton : Button
 		set
 		{
             _show_only = value;
-            _on_input_type_changed(CI._last_input_type, CI._last_controller);
+            OnInputTypeChanged(CI.LastInputType, CI.LastController);
         }
 	}
-    private ShowMode _show_only = ShowMode.ANY;
+    private EShowMode _show_only = EShowMode.ANY;
 
 	[Export]
-	public InputType force_type
+	public EInputType force_type
 	{
 		get
 		{
@@ -59,22 +59,22 @@ public partial class ControllerButton : Button
 		set
 		{
             _force_type = value;
-            _on_input_type_changed(CI._last_input_type, CI._last_controller);
+            OnInputTypeChanged(CI.LastInputType, CI.LastController);
         }
 	}
-    private InputType _force_type = InputType.NONE;
+    private EInputType _force_type = EInputType.NONE;
 
 	public override void _Ready()
 	{
-        CI.InputTypeChanged += _on_input_type_changed;
+        CI.InputTypeChanged += OnInputTypeChanged;
         this.path = path;
     }
 
-	public void _on_input_type_changed( InputType input_type, int controller )
+	public void OnInputTypeChanged( EInputType inputType, int controller )
 	{
-		if( show_only == ShowMode.ANY ||
-			(show_only == ShowMode.KEYBOARD_MOUSE && input_type == InputType.KEYBOARD_MOUSE) ||
-			(show_only == ShowMode.CONTROLLER && input_type == InputType.CONTROLLER))
+		if( show_only == EShowMode.ANY ||
+			(show_only == EShowMode.KEYBOARD_MOUSE && inputType == EInputType.KEYBOARD_MOUSE) ||
+			(show_only == EShowMode.CONTROLLER && inputType == EInputType.CONTROLLER))
 		{
             Visible = true;
             this.path = path;
@@ -83,9 +83,9 @@ public partial class ControllerButton : Button
             Visible = false;
     }
 
-	private string get_tts_string()
+	private string GetTTSString()
 	{
-		return CI.parse_path_to_tts(path, force_type);
+		return CI.ParsePathToTTS(path, force_type);
     }	
 
 }

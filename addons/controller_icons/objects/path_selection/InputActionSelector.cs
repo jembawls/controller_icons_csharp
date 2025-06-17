@@ -10,165 +10,169 @@ public partial class InputActionSelector : Panel
 	[Signal]
 	private delegate void DoneEventHandler();
 
-    private LineEdit n_name_filter;
-    private CheckButton n_builtin_action_button;
-    private Tree n_tree;
+    private LineEdit nNameFilter;
+    private CheckButton nBuiltInActionButton;
+    private Tree nTree;
 
     private TreeItem root;
     private List<ControllerIcons_Item> items = [];
 
 	public override void _Ready()
 	{
-        n_name_filter = GetNode<LineEdit>("%NameFilter");
-		n_builtin_action_button = GetNode<CheckButton>("%BuiltinActionButton");
-		n_tree = GetNode<Tree>("%Tree");
+        nNameFilter = GetNode<LineEdit>("%NameFilter");
+		nBuiltInActionButton = GetNode<CheckButton>("%BuiltinActionButton");
+		nTree = GetNode<Tree>("%Tree");
     }
 
     class ControllerIcons_Item
     {
-        public bool is_default;
-        public TreeItem tree_item;
-        private ControllerIconTexture controller_icon_key;
-        private ControllerIconTexture controller_icon_joy;
+        public bool IsDefault;
+        public TreeItem nTreeItem;
+        private ControllerIconTexture ControllerIcon_Key;
+        private ControllerIconTexture ControllerIcon_Joy;
 
-        public bool show_default
+        public bool ShowDefault
         {
-            get { return _show_default; }
+            get { return _ShowDefault; }
             set
 			{
-                _show_default = value;
-                _query_visibility();
+                _ShowDefault = value;
+                QueryVisibility();
             }
 
         }
-    	private bool _show_default;
+    	private bool _ShowDefault;
 		
-        public bool filtered
+        public bool Filtered
         {
-            get { return _filtered; }
+            get { return _Filtered; }
             set
 			{
-                _filtered = value;
-                _query_visibility();
+                _Filtered = value;
+                QueryVisibility();
             }
 
         }
-    	private bool _filtered;
+    	private bool _Filtered;
 
 		public ControllerIcons_Item(Tree tree, TreeItem root, string path, bool is_default )
 		{
-			this.is_default = is_default;
-			this.filtered = true;
-			tree_item = tree.CreateItem(root);
+			this.IsDefault = is_default;
+			this.Filtered = true;
+			nTreeItem = tree.CreateItem(root);
 
-			tree_item.SetText(0, path);
+			nTreeItem.SetText(0, path);
 
-			controller_icon_key = new();
-			controller_icon_key.path = path;
-			controller_icon_key.force_type = InputType.KEYBOARD_MOUSE;
+            ControllerIcon_Key = new()
+            {
+                path = path,
+                force_type = EInputType.KEYBOARD_MOUSE
+            };
 
-			controller_icon_joy = new();
-			controller_icon_joy.path = path;
-			controller_icon_joy.force_type = InputType.CONTROLLER;
+            ControllerIcon_Joy = new()
+            {
+                path = path,
+                force_type = EInputType.CONTROLLER
+            };
 
-			tree_item.SetIconMaxWidth(1, 48 * controller_icon_key._textures.Count);
+            nTreeItem.SetIconMaxWidth(1, 48 * ControllerIcon_Key.Textures.Count);
 
-			tree_item.SetIconMaxWidth(2, 48 * controller_icon_key._textures.Count);
-			tree_item.SetIcon(1, controller_icon_key);
-			tree_item.SetIcon(2, controller_icon_joy);
+			nTreeItem.SetIconMaxWidth(2, 48 * ControllerIcon_Key.Textures.Count);
+			nTreeItem.SetIcon(1, ControllerIcon_Key);
+			nTreeItem.SetIcon(2, ControllerIcon_Joy);
 		}
 
-		private void _query_visibility()
+		private void QueryVisibility()
 		{
-			if( IsInstanceValid(tree_item) )
-				tree_item.Visible = show_default && filtered;
+			if( IsInstanceValid(nTreeItem) )
+				nTreeItem.Visible = ShowDefault && Filtered;
         }
 	}
 
-    public void populate( EditorInterface editor_interface )
+    public void Populate( EditorInterface editor_interface )
 	{
         // Clear
-        n_tree.Clear();
+        nTree.Clear();
 
         // Using clear() triggers a signal and uses freed nodes.
         // Setting the text directly does not.
-        n_name_filter.Text = "";
+        nNameFilter.Text = "";
         items.Clear();
 
-		n_name_filter.RightIcon = editor_interface.GetBaseControl().GetThemeIcon("Search", "EditorIcons");
+		nNameFilter.RightIcon = editor_interface.GetBaseControl().GetThemeIcon("Search", "EditorIcons");
 
 		// Setup tree columns
-		n_tree.SetColumnTitle(0, "Action");
+		nTree.SetColumnTitle(0, "Action");
 
-		n_tree.SetColumnTitle(1, "Preview");
-		n_tree.SetColumnExpand(1, false);
-		n_tree.SetColumnExpand(2, false);
+		nTree.SetColumnTitle(1, "Preview");
+		nTree.SetColumnExpand(1, false);
+		nTree.SetColumnExpand(2, false);
 
 		// Force ControllerIcons to reload the input map
 		CI.ParseInputActions();
 
 		// List with all default input actions
 		List<string> default_actions = [];		
-		foreach( string key in CI._builtin_keys )
+		foreach( string key in CI.BuiltInKeys )
 		{
 			default_actions.Add( key.TrimPrefix("input/") );
         }
 
         // Map with all input actions
-        root = n_tree.CreateItem();
-        foreach( string data in CI._custom_input_actions.Keys )
+        root = nTree.CreateItem();
+        foreach( string data in CI.CustomInputActions.Keys )
 		{
-			ControllerIcons_Item child = new(n_tree, root, data, default_actions.Contains(data) );
+			ControllerIcons_Item child = new(nTree, root, data, default_actions.Contains(data) );
 			items.Add(child);
 		}
 
-		set_default_actions_visibility(n_builtin_action_button.ButtonPressed);
+		SetDefaultActionsVisibility(nBuiltInActionButton.ButtonPressed);
 	}
 
-	public string get_icon_path()
+	public string GetIconPath()
 	{
-        TreeItem item = n_tree.GetSelected();
+        TreeItem item = nTree.GetSelected();
         if( IsInstanceValid(item) )
             return item.GetText(0);
 
         return "";
     }
 
-	private void set_default_actions_visibility( bool display )
+	private void SetDefaultActionsVisibility( bool display )
 	{
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for item:ControllerIcons_Item in items:
 		foreach ( ControllerIcons_Item item in items )
 		{
-			item.show_default = display || !item.is_default;
+			item.ShowDefault = display || !item.IsDefault;
 		}
 	}
 
-	private void grab_focus()
+	private void _GrabFocus()
 	{
-        n_name_filter.GrabFocus();
+        nNameFilter.GrabFocus();
     }
 
-	private void _on_builtin_action_button_toggled( bool toggled_on )
+	private void OnBuiltInActionButtonToggled( bool toggled_on )
 	{
-        set_default_actions_visibility(toggled_on);
+        SetDefaultActionsVisibility(toggled_on);
     }
 
-	private void _on_tree_item_activated()
+	private void OnTreeItemActivated()
 	{
         EmitSignalDone();
     }
 
-	private void _on_name_filter_text_changed( string new_text )
+	private void OnNameFilterTextChanged( string new_text )
 	{
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for item:ControllerIcons_Item in items:
 		foreach( ControllerIcons_Item item in items )
 		{
-			bool filtered = new_text.Length == 0 || item.tree_item.GetText(0).FindN(new_text) != -1;
-        	item.filtered = filtered;
+			bool filtered = new_text.Length == 0 || item.nTreeItem.GetText(0).FindN(new_text) != -1;
+        	item.Filtered = filtered;
 		}
     }
 

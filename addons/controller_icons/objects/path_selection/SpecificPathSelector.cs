@@ -10,257 +10,258 @@ public partial class SpecificPathSelector : Panel
 	[Signal]
 	private delegate void DoneEventHandler();
 
-    private LineEdit n_name_filter;
-    private Tree n_base_asset_names;
-    private HFlowContainer n_assets_container;
+    private LineEdit NameFilter;
+    private Tree BaseAssetNames;
+    private HFlowContainer AssetsContainer;
 
-    private ControllerIcons_Icon _last_pressed_icon;
-    private ulong _last_pressed_timestamp;
+    private ControllerIcons_Icon _LastPressedIcon;
+    private ulong _LastPressedTimestamp;
 
-    private Color color_text_enabled;
-	private Color color_text_disabled;
+    private Color ColorTextEnabled;
+	private Color ColorTextDisabled;
 	
-    Dictionary<string,Dictionary<string,ControllerIcons_Icon>> button_nodes = [];
-    TreeItem asset_names_root;
+    Dictionary<string,Dictionary<string,ControllerIcons_Icon>> ButtonNodes = [];
+    TreeItem AssetNamesRoot;
 
 	public override void _Ready()
 	{
-        n_name_filter = GetNode<LineEdit>("%NameFilter");
-        n_base_asset_names = GetNode<Tree>("%BaseAssetNames");
-		n_assets_container = GetNode<HFlowContainer>("%AssetsContainer");
+        NameFilter = GetNode<LineEdit>("%NameFilter");
+        BaseAssetNames = GetNode<Tree>("%BaseAssetNames");
+		AssetsContainer = GetNode<HFlowContainer>("%AssetsContainer");
 	}
 
 	class ControllerIcons_Icon
 	{
 		public static ButtonGroup group = new();
 
-        public Button button;
-        public string category;
-        public string path;
+        public Button Button;
+        public string Category;
+        public string Path;
 
-        public bool selected
+        public bool Selected
 		{
-			get	{ return _selected; }
+			get	{ return _Selected; }
 			set
 			{
-                _selected = value;
-                _query_visibility();
+                _Selected = value;
+                QueryVisibility();
             }
 
 		}
-        private bool _selected;
+        private bool _Selected;
 
-        public bool filtered
+        public bool Filtered
 		{
-			get	{ return _filtered; }
+			get	{ return _Filtered; }
 			set
 			{
-                _filtered = value;
-                _query_visibility();
+                _Filtered = value;
+                QueryVisibility();
             }
 
 		}
-        private bool _filtered;
+        private bool _Filtered;
 		
-		private void _query_visibility()
+		private void QueryVisibility()
 		{
-			if( IsInstanceValid(button) )
+			if( IsInstanceValid(Button) )
 			{
-				button.Visible = selected && filtered;
+				Button.Visible = Selected && Filtered;
             }
 		}
 
 		public ControllerIcons_Icon( string category, string path)
 		{
-            this.category = category;
-            filtered = true;
-            this.path = path.Split("/")[1];
+            this.Category = category;
+            Filtered = true;
+            this.Path = path.Split("/")[1];
 
-            button = new();
-            button.CustomMinimumSize = new Vector2(100, 100);
-            button.ClipText = true;
-			button.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
-			button.IconAlignment = HorizontalAlignment.Center;
-			button.VerticalIconAlignment = VerticalAlignment.Top;
-			button.ExpandIcon = true;
-			button.ToggleMode = true;
-			button.ButtonGroup = group;
-			button.Text = this.path;
+            Button = new()
+            {
+                CustomMinimumSize = new Vector2(100, 100),
+                ClipText = true,
+                TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis,
+                IconAlignment = HorizontalAlignment.Center,
+                VerticalIconAlignment = VerticalAlignment.Top,
+                ExpandIcon = true,
+                ToggleMode = true,
+                ButtonGroup = group,
+                Text = this.Path
+            };
 
-			ControllerIconTexture icon = new();
-            icon.path = path;
-            button.Icon = icon;
+            ControllerIconTexture icon = new()
+            {
+                path = path
+            };
+            Button.Icon = icon;
         }
 	}
 
-    public void populate( EditorInterface editor_interface )
+    public void Populate( EditorInterface editorInterface )
 	{
         // Using clear() triggers a signal and uses freed nodes.
         // Setting the text directly does not.
-        n_name_filter.Text = "";
-        n_base_asset_names.Clear();
-        button_nodes.Clear();
-        foreach( Node c in n_assets_container.GetChildren() )
+        NameFilter.Text = "";
+        BaseAssetNames.Clear();
+        ButtonNodes.Clear();
+        foreach( Node c in AssetsContainer.GetChildren() )
 		{
-            n_assets_container.RemoveChild(c);
+            AssetsContainer.RemoveChild(c);
             c.QueueFree();
         }
 
 		// UPGRADE: In Godot 4.2, there's no need to have an instance to
 		// EditorInterface, since it's now a static call:
 		// var editor_control := EditorInterface.get_base_control()
-		Control editor_control = editor_interface.GetBaseControl();
-        color_text_enabled = editor_control.GetThemeColor("font_color", "Editor");
-        color_text_disabled = editor_control.GetThemeColor("disabled_font_color", "Editor");
-        n_name_filter.RightIcon = editor_control.GetThemeIcon("Search", "EditorIcons");
+		Control editorControl = editorInterface.GetBaseControl();
+        ColorTextEnabled = editorControl.GetThemeColor("font_color", "Editor");
+        ColorTextDisabled = editorControl.GetThemeColor("disabled_font_color", "Editor");
+        NameFilter.RightIcon = editorControl.GetThemeIcon("Search", "EditorIcons");
 
-        asset_names_root = n_base_asset_names.CreateItem();
+        AssetNamesRoot = BaseAssetNames.CreateItem();
 
-        Godot.Collections.Array<string> base_paths = [
-            CI._settings.custom_asset_dir,
+        Godot.Collections.Array<string> basePaths = [
+            CI.Settings.custom_asset_dir,
             "res://addons/controller_icons/assets"
         ];
 
         // UPGRADE: In Godot 4.2, for-loop variables can be
         // statically typed:
         // for base_path:string in base_paths:
-        foreach( string base_path in base_paths )
+        foreach( string basePath in basePaths )
 		{
-			if( base_path.Length == 0 || !base_path.StartsWith("res://") )
+			if( basePath.Length == 0 || !basePath.StartsWith("res://") )
                 continue;
 
             // Files first
-            handle_files("", base_path);
+            HandleFiles("", basePath);
 
             // Directories next
-            foreach( string dir in DirAccess.GetDirectoriesAt(base_path) )
+            foreach( string dir in DirAccess.GetDirectoriesAt(basePath) )
 			{
-                handle_files(dir, base_path.PathJoin(dir));
+                HandleFiles(dir, basePath.PathJoin(dir));
             }
 		}
 
-        TreeItem child = asset_names_root.GetNextInTree();
-        if( child != null )
-            child.Select(0);
+        TreeItem child = AssetNamesRoot.GetNextInTree();
+        child?.Select(0);
     }
 
-	private void handle_files( string category, string base_path )
+	private void HandleFiles( string category, string basePaths )
 	{
-		foreach( string file in DirAccess.GetFilesAt(base_path) )
+		foreach( string file in DirAccess.GetFilesAt(basePaths) )
 		{
-			if( file.GetExtension() == CI._base_extension )
-				create_icon(category, base_path.PathJoin(file));
+			if( file.GetExtension() == CI.BaseExtension )
+				CreateIcon(category, basePaths.PathJoin(file));
         }
 	}
 
-	private void create_icon( string category, string path )
+	private void CreateIcon( string category, string path )
 	{
-        string map_category = category.Length == 0 ? "<no category>" : category;
+        string mapCategory = category.Length == 0 ? "<no category>" : category;
 		
-        if( !button_nodes.ContainsKey(map_category) )
+        if( !ButtonNodes.ContainsKey(mapCategory) )
 		{
-			button_nodes[map_category] = [];
-            TreeItem item = n_base_asset_names.CreateItem(asset_names_root);
-            item.SetText(0, map_category);
+			ButtonNodes[mapCategory] = [];
+            TreeItem item = BaseAssetNames.CreateItem(AssetNamesRoot);
+            item.SetText(0, mapCategory);
         }
 
 		string filename = path.GetFile();
-        if( button_nodes[map_category].ContainsKey(filename) ) return;
+        if( ButtonNodes[mapCategory].ContainsKey(filename) ) return;
 
         string icon_path = (category.Length == 0 ? "" : category ) + "/" + path.GetFile().GetBaseName();
-        ControllerIcons_Icon icon = new(map_category, icon_path);
+        ControllerIcons_Icon icon = new(mapCategory, icon_path);
 
-        button_nodes[map_category][filename] = icon;
-        n_assets_container.AddChild(icon.button);
+        ButtonNodes[mapCategory][filename] = icon;
+        AssetsContainer.AddChild(icon.Button);
 
-        icon.button.Pressed += () => {
-			if( _last_pressed_icon == icon )
+        icon.Button.Pressed += () => {
+			if( _LastPressedIcon == icon )
 			{
-				if( Time.GetTicksMsec() < _last_pressed_timestamp )
+				if( Time.GetTicksMsec() < _LastPressedTimestamp )
                     EmitSignalDone();
                 else
-                    _last_pressed_timestamp = Time.GetTicksMsec() + 1000;        
+                    _LastPressedTimestamp = Time.GetTicksMsec() + 1000;        
             }
 			else
 			{
-				_last_pressed_icon = icon;
-				_last_pressed_timestamp = Time.GetTicksMsec() + 1000;
+				_LastPressedIcon = icon;
+				_LastPressedTimestamp = Time.GetTicksMsec() + 1000;
 			}
         };		
 	}
 
-	public string get_icon_path()
+	public string GetIconPath()
 	{
-		Button button = ControllerIcons_Icon.group.GetPressedButton() as Button;
-        if( button != null )
-        	return (button.Icon as ControllerIconTexture).path;
+        if (ControllerIcons_Icon.group.GetPressedButton() is Button button)
+            return (button.Icon as ControllerIconTexture).path;
 
         return "";
     }
 
-	private void grab_focus()
+	private void GrabFocus()
 	{
-		n_name_filter.GrabFocus();
+		NameFilter.GrabFocus();
     }
 
-	private void _on_base_asset_names_item_selected()
+	private void OnBaseAssetNamesItemSelected()
 	{
-        TreeItem selected = n_base_asset_names.GetSelected();
+        TreeItem selected = BaseAssetNames.GetSelected();
         if( selected == null ) return;
 
         string category = selected.GetText(0);
-        if( !button_nodes.ContainsKey(category) ) return;
+        if( !ButtonNodes.ContainsKey(category) ) return;
 
         // UPGRADE: In Godot 4.2, for-loop variables can be
         // statically typed:
         // for key:string in button_nodes.keys():
         // 	for icon:ControllerIcon_Icon in button_nodes[key].values():
-        foreach( string key in button_nodes.Keys )
+        foreach( string key in ButtonNodes.Keys )
 		{
-			foreach( ControllerIcons_Icon icon in button_nodes[key].Values )
+			foreach( ControllerIcons_Icon icon in ButtonNodes[key].Values )
 			{
-                icon.selected = key == category;
+                icon.Selected = key == category;
             }
 		}
 	}
 
-	private void _on_name_filter_text_changed( string new_text )
+	private void OnNameFilterTextChanged( string new_text )
 	{
 		Godot.Collections.Dictionary<string,bool> any_visible = [];
-		TreeItem asset_name = asset_names_root.GetNextInTree();
+		TreeItem asset_name = AssetNamesRoot.GetNextInTree();
 		while( asset_name != null )
 		{
 			any_visible[asset_name.GetText(0)] = false;
 			asset_name = asset_name.GetNextInTree();
 		}
 		
-		TreeItem selected_category = n_base_asset_names.GetSelected();
+		TreeItem selectedCategory = BaseAssetNames.GetSelected();
 
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for key:string in button_nodes.keys():
 		// 	for icon:Icon in button_nodes[key].values():
-		foreach( string key in button_nodes.Keys )
+		foreach( string key in ButtonNodes.Keys )
 		{
-			foreach( ControllerIcons_Icon icon in button_nodes[key].Values )
+			foreach( ControllerIcons_Icon icon in ButtonNodes[key].Values )
 			{
-				bool filtered = new_text.Length == 0 || icon.path.FindN(new_text) != -1;
-				icon.filtered = filtered;
+				bool filtered = new_text.Length == 0 || icon.Path.FindN(new_text) != -1;
+				icon.Filtered = filtered;
 				any_visible[key] = any_visible[key] || filtered;
 			}
 		}
 
-        asset_name = asset_names_root.GetNextInTree();
+        asset_name = AssetNamesRoot.GetNextInTree();
         while( asset_name != null )
 		{
 			string category = asset_name.GetText(0);
-			if( any_visible.ContainsKey(category) )
+			if( any_visible.TryGetValue(category, out bool selectable) )
 			{
-				bool selectable = any_visible[category];
-				asset_name.SetSelectable(0, selectable);
+                asset_name.SetSelectable(0, selectable);
 				if( !selectable )
 					asset_name.Deselect(0);
-                asset_name.SetCustomColor(0, selectable ? color_text_enabled : color_text_disabled);
+                asset_name.SetCustomColor(0, selectable ? ColorTextEnabled : ColorTextDisabled);
 			}
 
 			asset_name = asset_name.GetNextInTree();
