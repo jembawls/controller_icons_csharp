@@ -113,6 +113,7 @@ public partial class ControllerIcons : Node
 		{
 			ParseInputActions();
 		}
+		Settings = ResourceLoader.Load<ControllerSettings>("res://addons/controller_icons/settings.tres");
 	}
 
 	public override void _ExitTree()
@@ -159,7 +160,6 @@ public partial class ControllerIcons : Node
 	public override void _Ready()
 	{
 		Input.JoyConnectionChanged += OnJoyConnectionChangedEventHandler;
-		Settings = ResourceLoader.Load<ControllerSettings>("res://addons/controller_icons/settings.tres");
 
 		Settings ??= new();
 		Mapper ??= new();
