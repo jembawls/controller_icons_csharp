@@ -89,7 +89,7 @@ public partial class ControllerIconPathSelector : PanelContainer
 		}
 
 		await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-		nTabContainer.GetCurrentTabControl().GrabFocus();
+		(nTabContainer.GetCurrentTabControl() as SelectorPanel).GrabFocus();
 	}
 
 	private void OnInputActionDone()

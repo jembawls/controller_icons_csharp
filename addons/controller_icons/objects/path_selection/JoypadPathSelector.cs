@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using static ControllerIcons;
 
 [Tool]
-public partial class JoypadPathSelector : Panel
+public partial class JoypadPathSelector : SelectorPanel
 {
 	[Signal]
 	private delegate void DoneEventHandler();
@@ -52,11 +52,6 @@ public partial class JoypadPathSelector : Panel
 		}
 
 		return "";
-	}
-
-	public void GrabFocus()
-	{
-		//do nothing
 	}
 
 	public override void _Input( InputEvent e )

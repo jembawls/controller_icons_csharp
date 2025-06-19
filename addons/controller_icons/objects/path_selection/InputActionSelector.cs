@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using static ControllerIcons;
 
 [Tool]
-public partial class InputActionSelector : Panel
+public partial class InputActionSelector : SelectorPanel
 {
 	[Signal]
 	private delegate void DoneEventHandler();
@@ -149,7 +149,7 @@ public partial class InputActionSelector : Panel
 		}
 	}
 
-	private void _GrabFocus()
+	public override void GrabFocus()
 	{
 		nNameFilter.GrabFocus();
 	}

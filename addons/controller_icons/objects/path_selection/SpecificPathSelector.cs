@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using static ControllerIcons;
 
 [Tool]
-public partial class SpecificPathSelector : Panel
+public partial class SpecificPathSelector : SelectorPanel
 {
 	[Signal]
 	private delegate void DoneEventHandler();
@@ -200,7 +200,7 @@ public partial class SpecificPathSelector : Panel
 		return "";
 	}
 
-	private void GrabFocus()
+	public override void GrabFocus()
 	{
 		NameFilter.GrabFocus();
 	}
