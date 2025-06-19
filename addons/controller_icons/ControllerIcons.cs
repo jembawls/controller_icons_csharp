@@ -38,14 +38,14 @@ public partial class ControllerIcons : Node
 
 	public EInputType LastInputType = EInputType.KEYBOARD_MOUSE;
 	public int LastController;
-	public ControllerSettings Settings = ResourceLoader.Load<ControllerSettings>("res://addons/controller_icons/settings.tres");
+    public ControllerSettings Settings;
 	public string BaseExtension = "png";
 
 	// Custom mouse velocity calculation, because Godot
 	// doesn't implement it on some OSes apparently
 	private const float _MOUSE_VELOCITY_DELTA = 0.1f;
 	private float _t;
-	private int MouseVelocity;
+	private int MouseVelocity; 
 
 	private bool setLikelyInput = false;
 
