@@ -24,16 +24,17 @@ I've only done some basic testing on this but it seems to work. However, your pr
 1. Close your editor.
 2. Delete (or move) the GDScript ControllerIcons plugin from the `addons` directory.
 3. Copy in the C# ControllerIcons plugin into the `addons` directory.
-4. Open your IDE/Text Editor of choice (Even Notepad++ - anything with a search and replace feature) and search and replace within your project for all instances of:
+4. Next you need to fix the dependencies. You can either do this by opening Godot and it will give you the option to Fix Dependencies. Or you can open your IDE/Text Editor of choice and search and replace the filenames to fix the dependencies. In either case, the file mappings is as follows:
     * "ControllerIcons.gd" --> "ControllerIcons.cs"
     * "ControllerIconTexture.gd" --> "ControllerIconTexture.cs"
-5. __If you are using any of the Deprecated types__ in your project, you will need to search and replace them also. (__Note:__ Be careful with your search and replace here as some of the original GDScript filenames are fairly generic.)
+5. __If you are using any of the Deprecated types__ in your project, you will need to fix them also. (__Note:__ Be careful with your search and replace here as some of the original GDScript filenames are fairly generic.)
     * "Sprite.gd" --> "ControllerSprite2D.cs"
     * "Sprite3D.gd" --> "ControllerSprite3D.cs"
     * "TextureRect.gd" --> "ControllerTextureRect.cs"
     * "Button.gd" --> "ControllerButton.cs"
 6. Build your project.
      * If you aren't using a text editor/IDE to build your game, you may have to launch the engine and build in there and then restart the engine.
+     * You may need to toggle the plugin off and on again, save, and restart your editor.
 7. At this point on, you may have a bunch of UID warnings/errors. This is because the UIDs of the old plugin won't match the new UIDs of the new plugin. This shouldn't block the plugin from working, but you'll likely want to hunt down each one manually and fix them. The way to fix it is to just copy the UID in the warning/error, look for where it is referenced in your project (likely some `metadata/_custom_type_script` line in a `*.tscn` file) and remove the line  - or replace it with the UID that corresponds with the new C# file (most likely the UID in `ControllerIconTexture.cs.uid` if you are not using deprecated features).
 
 And you should be done!
