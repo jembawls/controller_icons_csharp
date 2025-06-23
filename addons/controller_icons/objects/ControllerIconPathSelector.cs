@@ -15,9 +15,9 @@ public partial class ControllerIconPathSelector : PanelContainer
 
 	private bool InputActionPopulated = false;
 	private bool JoypadPathPopulated = false;
-	private bool SpecificPathPopulated = false;
+	private bool SpecificPathPopulated = false; 
 
-	public EditorInterface EditorInterface;	
+	public EditorInterface EditorInterface;
 
 	public override void _Ready()
 	{
@@ -25,9 +25,13 @@ public partial class ControllerIconPathSelector : PanelContainer
 		nInputAction = GetNode<InputActionSelector>("%Input Action");
 		nJoypadPath = GetNode<JoypadPathSelector>("%Joypad Path");
 		nSpecificPath = GetNode<SpecificPathSelector>("%Specific Path");
+
+		nInputAction.Done += OnInputActionDone;
+		nJoypadPath.Done += OnJoypadPathDone;
+		nSpecificPath.Done += OnSpecificPathDone;
 	}
 
-	public void populate( EditorInterface editorInterface )
+	public void Populate( EditorInterface editorInterface )
 	{
 		this.EditorInterface = editorInterface;
 		InputActionPopulated = false;
@@ -85,7 +89,11 @@ public partial class ControllerIconPathSelector : PanelContainer
 			{
 				SpecificPathPopulated = true;
 				nSpecificPath.Populate(EditorInterface);
-			}			
+			}
+			else if( !nSpecificPath.IsSignalsConnected )
+			{
+				nSpecificPath.HookupSignals();
+			}
 		}
 
 		await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
@@ -94,16 +102,38 @@ public partial class ControllerIconPathSelector : PanelContainer
 
 	private void OnInputActionDone()
 	{
+	#if GODOT4_4_OR_GREATER
 		EmitSignalPathSelected(nInputAction.GetIconPath());
+	#else
+		EmitSignal(SignalName.PathSelected, nInputAction.GetIconPath());
+	#endif
 	}
 
 	private void OnJoypadPathDone()
 	{
+	#if GODOT4_4_OR_GREATER
 		EmitSignalPathSelected(nJoypadPath.GetIconPath());
+	#else
+		EmitSignal(SignalName.PathSelected, nJoypadPath.GetIconPath());
+	#endif
 	}
 
 	private void OnSpecificPathDone()
 	{
+	#if GODOT4_4_OR_GREATER
 		EmitSignalPathSelected(nSpecificPath.GetIconPath());
+	#else
+		EmitSignal(SignalName.PathSelected, nSpecificPath.GetIconPath());
+	#endif
+	}
+
+	public void Cleanup()
+	{
+		//the goal with this cleanup is to remove any signal connections
+		//to subclass objects (eg. ControllerIcons_Icon) so things
+		//play nicer with hotreloading.
+		//this means signals need to be re-hooked up if necessary when opened
+		//in OnTabContainerTabSelected.
+		nSpecificPath.CleanupSignals();
 	}
 }

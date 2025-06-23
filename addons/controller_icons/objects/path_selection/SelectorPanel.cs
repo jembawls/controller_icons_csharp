@@ -6,9 +6,9 @@ using static ControllerIcons;
 
 public partial class SelectorPanel : Panel
 {
-    public new virtual void GrabFocus()
+	public new virtual void GrabFocus()
 	{
-        //override me
+		//override me
 	}
 
 }

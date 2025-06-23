@@ -10,23 +10,22 @@ public partial class ControllerIconPathEditorProperty : EditorProperty
 	private ControllerIconPathSelectorPopup selector;
 	private LineEdit line_edit;
 
-	public ControllerIconPathEditorProperty( EditorInterface editor_interface )
+	public ControllerIconPathEditorProperty()
 	{
-		AddChild(BuildTree( editor_interface ));
 	}
 
-	private Node BuildTree( EditorInterface editor_interface )
+	public ControllerIconPathEditorProperty( EditorInterface editorInterface )
+	{
+		AddChild(BuildTree( editorInterface ));
+	}
+
+	private HBoxContainer BuildTree( EditorInterface editorInterface )
 	{
 		selector = ResourceLoader.Load<PackedScene>("res://addons/controller_icons/objects/ControllerIconPathSelectorPopup.tscn").Instantiate<ControllerIconPathSelectorPopup>();
 
 		selector.Visible = false;
-		selector.EditorInterface = editor_interface;
-		selector.PathSelected += ( string path ) => {
-			if( path.Length > 0 )
-			{
-				EmitChanged(GetEditedProperty(), path);
-			}
-		};
+		selector.EditorInterface = editorInterface;
+		selector.PathSelected += OnPathSelected;
 
 		HBoxContainer root = new();
 
@@ -34,30 +33,43 @@ public partial class ControllerIconPathEditorProperty : EditorProperty
 		{
 			SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
 		};
-		line_edit.TextChanged += ( string text ) => {
-			EmitChanged(GetEditedProperty(), text);
-
-		};
+		line_edit.TextChanged += OnTextChanged;
 
 		Button button = new()
 		{
 			// UPGRADE: In Godot 4.2, there's no need to have an instance to
 			// EditorInterface, since it's now a static call:
 			// button.icon = EditorInterface.get_base_control().get_theme_icon("ListSelect", "EditorIcons")
-			Icon = editor_interface.GetBaseControl().GetThemeIcon("ListSelect", "EditorIcons"),
+			Icon = editorInterface.GetBaseControl().GetThemeIcon("ListSelect", "EditorIcons"),
 
 			TooltipText = "Select an icon path"
 		};
-		button.Pressed += () => {
-			selector.Populate();
-			selector.PopupCentered();
-		};
+		button.Pressed += OnButtonPressed;
 
 		root.AddChild(line_edit);
 		root.AddChild(button);
 		root.AddChild(selector);
 
 		return root;
+	}
+
+	private void OnTextChanged( string text )
+	{
+		EmitChanged(GetEditedProperty(), text);
+	}
+
+	private void OnPathSelected(string path)
+	{
+		if( path.Length > 0 )
+		{
+			EmitChanged(GetEditedProperty(), path);
+		}
+	}
+
+	private void OnButtonPressed()
+	{
+		selector.Populate();
+		selector.PopupCentered();
 	}
 
 	public override void _UpdateProperty()

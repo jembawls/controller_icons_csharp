@@ -39,6 +39,3 @@ layout_mode = 2
 focus_mode = 1
 
 [connection signal="tab_selected" from="TabContainer" to="." method="OnTabContainerTabSelected"]
-[connection signal="Done" from="TabContainer/Input Action" to="." method="OnInputActionDone"]
-[connection signal="Done" from="TabContainer/Joypad Path" to="." method="OnJoypadPathDone"]
-[connection signal="Done" from="TabContainer/Specific Path" to="." method="OnSpecificPathDone"]

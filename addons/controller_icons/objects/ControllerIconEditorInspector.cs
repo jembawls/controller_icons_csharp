@@ -7,7 +7,6 @@ using static ControllerIcons;
 [Tool]
 public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 {
-	public EditorInterface EditorInterface;
 	private ControllerIcons_TexturePreview preview;
 
 	class ControllerIcons_TexturePreview
@@ -71,7 +70,7 @@ public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 
 	public override void _ParseBegin( GodotObject obj )
 	{
-		preview = new(EditorInterface);
+		preview = new( ControllerIconPlugin.EditorInterface );
 		AddCustomControl(preview.get_root());
 
 		if( obj is ControllerIconTexture icon )
@@ -82,7 +81,7 @@ public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 	{
 		if( name == "path" )
 		{
-			ControllerIconPathEditorProperty path_selector_instance = new( EditorInterface );
+			ControllerIconPathEditorProperty path_selector_instance = new( ControllerIconPlugin.EditorInterface );
 			AddPropertyEditor(name, path_selector_instance);
 			return true;
 		}

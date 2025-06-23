@@ -7,6 +7,21 @@ using System.Linq;
 public partial class ControllerIconPlugin : EditorPlugin
 {
 	private ControllerIconEditorInspector inspectorPlugin;
+	public static EditorInterface EditorInterface 
+	{ 
+		get
+		{
+		#if GODOT4_2_OR_GREATER
+			return EditorInterface.Singleton;
+		#else
+			return staticRef.GetEditorInterface();
+		#endif
+		}
+	}
+	
+#if GODOT4_1
+	private static ControllerIconPlugin staticRef { get; set; }
+#endif
 
 	public override void _EnablePlugin()
 	{
@@ -20,10 +35,10 @@ public partial class ControllerIconPlugin : EditorPlugin
 
 	public override void _EnterTree()
 	{
-		inspectorPlugin = new()
-		{
-			EditorInterface = EditorInterface.Singleton
-		};
+#if GODOT4_1
+		staticRef = this;
+#endif
+		inspectorPlugin = new();
 
 		AddInspectorPlugin(inspectorPlugin);
 	}

@@ -60,7 +60,7 @@ public partial class ControllerIconTexture : Texture2D
 	public string path { 
 		get 
 		{ 
-			return _path; 
+			return _path;
 		}
 
 		set 
@@ -77,7 +77,7 @@ public partial class ControllerIconTexture : Texture2D
 	public EShowMode show_mode { 
 		get 
 		{ 
-			return _show_mode; 
+			return _show_mode;
 		}
 
 		set 
@@ -99,7 +99,7 @@ public partial class ControllerIconTexture : Texture2D
 	public ControllerSettings.Devices force_controller_icon_style { 
 		get 
 		{ 
-			return _force_controller_icon_style; 
+			return _force_controller_icon_style;
 		}
 
 		set 
@@ -119,7 +119,7 @@ public partial class ControllerIconTexture : Texture2D
 	public EInputType force_type { 
 		get 
 		{ 
-			return _force_type; 
+			return _force_type;
 		}
 
 		set 
@@ -157,7 +157,7 @@ public partial class ControllerIconTexture : Texture2D
 	public EForceDevice force_device { 
 		get 
 		{ 
-			return _force_device; 
+			return _force_device;
 		}
 
 		set 
@@ -174,7 +174,7 @@ public partial class ControllerIconTexture : Texture2D
 	public LabelSettings custom_label_settings { 
 		get 
 		{ 
-			return _custom_label_settings; 
+			return _custom_label_settings;
 		}
 
 		set 
@@ -225,7 +225,7 @@ public partial class ControllerIconTexture : Texture2D
 			// UPGRADE: In Godot 4.2, for-loop variables can be
 			// statically typed:
 			// for tex:Texture in value:
-			foreach( Texture2D tex in value )
+			foreach( Texture2D tex in value ) 
 			{
 				if( tex != null && tex.IsConnected(SignalName.Changed, Callable.From( ReloadResource )) )
 					tex.Changed -= ReloadResource;
@@ -263,7 +263,7 @@ public partial class ControllerIconTexture : Texture2D
 			}
 		}
 	}
-	private List<Texture2D> _Textures = [];
+	private List<Texture2D> _Textures = new();
 
 	private const int _NULL_SIZE = 2;
 	private Font Font;
@@ -272,15 +272,39 @@ public partial class ControllerIconTexture : Texture2D
 	
 	public ControllerIconTexture()
 	{
+		//if plugin isn't ready ready, keep checking on draw until it is then set it up
+		if( !IsControllerIconsPluginReady() )
+		{
+			RenderingServer.FramePostDraw += OnFramePostDraw;
+		}
+		else
+		{
+			Setup();
+		}
+	}
+
+	private void Setup()
+	{
 		CI.InputTypeChanged += OnInputTypeChanged;
 	}
 
-	public void OnLabelSettingsChanged()
+	public void OnLabelSettingsChanged() 
 	{		
 		Font = LabelSettings.Font == null ? ThemeDB.FallbackFont : LabelSettings.Font;
 		TextSize = Font.GetStringSize("+", HorizontalAlignment.Left, -1, LabelSettings.FontSize);
 
 		ReloadResource();
+	}
+
+	private void OnFramePostDraw()
+	{
+		//Check if plugin is ready
+		if( IsControllerIconsPluginReady() )
+		{
+			RenderingServer.FramePostDraw -= OnFramePostDraw;
+			Setup();
+			LoadTexturePath();
+		}
 	}
 
 	private void ReloadResource()
@@ -291,7 +315,7 @@ public partial class ControllerIconTexture : Texture2D
 
 	private void LoadTexturePathImpl()
 	{
-		List<Texture2D> textures = [];
+		List<Texture2D> textures = new();
 
 		if( CanBeShown() )
 		{
@@ -313,21 +337,24 @@ public partial class ControllerIconTexture : Texture2D
 
 	private void LoadTexturePath()
 	{
-		// Ensure loading only occurs on the main thread
-		if( OS.GetThreadCallerId() != OS.GetMainThreadId() )
+		if( IsControllerIconsPluginReady() )
 		{
-			// In Godot 4.3, call_deferred no longer makes this function
-			// execute on the main thread due to changes in resource loading.
-			// To ensure this, we instead rely on ControllerIcons for this
-			CI.DeferTextureLoad(Callable.From( LoadTexturePathImpl ));
-		}
-		else
-		{
-			LoadTexturePathImpl();
+			// Ensure loading only occurs on the main thread
+			if( OS.GetThreadCallerId() != OS.GetMainThreadId() )
+			{
+				// In Godot 4.3, call_deferred no longer makes this function
+				// execute on the main thread due to changes in resource loading.
+				// To ensure this, we instead rely on ControllerIcons for this
+				CI.DeferTextureLoad(Callable.From( LoadTexturePathImpl ));
+			}
+			else
+			{
+				LoadTexturePathImpl();
+			}
 		}
 	}
 
-	public void OnInputTypeChanged( EInputType inputType, int controller )
+	public void OnInputTypeChanged( int inputType, int controller )
 	{
 		LoadTexturePath();
 	}
@@ -575,7 +602,11 @@ public partial class ControllerIconTexture : Texture2D
 
 			Image textureRaw = Textures[i].GetImage();
 			textureRaw.Decompress();
+		#if GODOT4_3_OR_GREATER
 			img ??= Image.CreateEmpty(_GetWidth(), _GetHeight(), true, textureRaw.GetFormat());
+		#else
+			img ??= Image.Create(_GetWidth(), _GetHeight(), true, textureRaw.GetFormat());
+		#endif
 
 			img.BlitRect(textureRaw, new Rect2I(0, 0, textureRaw.GetWidth(), textureRaw.GetHeight()), position);
 

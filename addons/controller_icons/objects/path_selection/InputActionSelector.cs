@@ -8,14 +8,14 @@ using static ControllerIcons;
 public partial class InputActionSelector : SelectorPanel
 {
 	[Signal]
-	private delegate void DoneEventHandler();
+	public delegate void DoneEventHandler();
 
 	private LineEdit nNameFilter;
 	private CheckButton nBuiltInActionButton;
 	private Tree nTree;
 
 	private TreeItem root;
-	private List<ControllerIcons_Item> items = [];
+	private List<ControllerIcons_Item> items = new();
 
 	public override void _Ready()
 	{
@@ -112,7 +112,7 @@ public partial class InputActionSelector : SelectorPanel
 		CI.ParseInputActions();
 
 		// List with all default input actions
-		List<string> default_actions = [];		
+		List<string> default_actions = new();		
 		foreach( string key in CI.BuiltInKeys )
 		{
 			default_actions.Add( key.TrimPrefix("input/") );
@@ -161,7 +161,11 @@ public partial class InputActionSelector : SelectorPanel
 
 	private void OnTreeItemActivated()
 	{
+	#if GODOT4_4_OR_GREATER
 		EmitSignalDone();
+	#else
+		EmitSignal(SignalName.Done);
+	#endif
 	}
 
 	private void OnNameFilterTextChanged( string new_text )

@@ -1,4 +1,5 @@
 using Godot;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,15 +8,17 @@ using System.Linq;
 public partial class ControllerIcons : Node
 {
 	[Signal]
-	public delegate void InputTypeChangedEventHandler(EInputType inputType, int controller);
+	public delegate void InputTypeChangedEventHandler(int inputType, int controller);
 
-	public enum EInputType {
+	public enum EInputType
+	{
 		NONE,
 		KEYBOARD_MOUSE, // The input is from the keyboard and/or mouse.
 		CONTROLLER // The input is from a controller.
 	}
 
-	public enum EPathType {
+	public enum EPathType
+	{
 		INPUT_ACTION, // The path is an input action.
 		JOYPAD_PATH, // The path is a generic joypad path.
 		SPECIFIC_PATH // The path is a specific path.
@@ -30,22 +33,22 @@ public partial class ControllerIcons : Node
 
 	public static ControllerIcons CI { get; set; }
 
-	private Godot.Collections.Dictionary<string, Texture2D> _CachedIcons = [];
-	public Godot.Collections.Dictionary<string, Godot.Collections.Array<InputEvent>> CustomInputActions = [];
+	private Godot.Collections.Dictionary<string, Texture2D> _CachedIcons = new();
+	public Godot.Collections.Dictionary<string, Godot.Collections.Array<InputEvent>> CustomInputActions = new();
 
 	private Mutex _CachedCallablesLock = new();
-	private readonly List<Callable> _CachedCallables = [];
+	private readonly List<Callable> _CachedCallables = new();
 
 	public EInputType LastInputType = EInputType.KEYBOARD_MOUSE;
 	public int LastController;
-    public ControllerSettings Settings;
+	public ControllerSettings Settings;
 	public string BaseExtension = "png";
 
 	// Custom mouse velocity calculation, because Godot
 	// doesn't implement it on some OSes apparently
 	private const float _MOUSE_VELOCITY_DELTA = 0.1f;
 	private float _t;
-	private int MouseVelocity; 
+	private int MouseVelocity;
 
 	private bool setLikelyInput = false;
 
@@ -54,7 +57,7 @@ public partial class ControllerIcons : Node
 	// Default actions will be the builtin editor actions when
 	// the script is at editor ("tool") level. To pickup more
 	// actions available, these have to be queried manually
-	public readonly Godot.Collections.Array<string> BuiltInKeys = [
+	public readonly Godot.Collections.Array<string> BuiltInKeys = new(){
 		"input/ui_accept", "input/ui_cancel", "input/ui_copy",
 		"input/ui_cut", "input/ui_down", "input/ui_end",
 		"input/ui_filedialog_refresh", "input/ui_filedialog_show_hidden",
@@ -91,11 +94,17 @@ public partial class ControllerIcons : Node
 		"input/ui_text_select_word_under_caret", "input/ui_text_select_word_under_caret.macos",
 		"input/ui_text_submit", "input/ui_text_toggle_insert_mode", "input/ui_undo",
 		"input/ui_up",
-	];
+	};
 
 	public ControllerIcons()
 	{
 		CI = this;
+	}
+
+	public override void _EnterTree()
+	{
+		// setup moved to EnterTree from constructor to handle cases where 
+		// ControllerSettings is not yet setup. typically during hotreload.
 		Setup();
 	}
 
@@ -103,7 +112,11 @@ public partial class ControllerIcons : Node
 	{
 		LastInputType = lastInputType;
 		LastController = lastController;
-		CI.EmitSignalInputTypeChanged(LastInputType, LastController);
+	#if GODOT4_4_OR_GREATER
+		CI.EmitSignalInputTypeChanged((int)LastInputType, LastController);
+	#else
+		CI.EmitSignal( SignalName.InputTypeChanged, (int)LastInputType, LastController);
+	#endif
 	}
 
 	public void Setup()
@@ -116,8 +129,17 @@ public partial class ControllerIcons : Node
 		Settings = ResourceLoader.Load<ControllerSettings>("res://addons/controller_icons/settings.tres");
 	}
 
+	public static bool IsControllerIconsPluginReady()
+	{
+		return CI != null && CI.Settings != null;
+	}
+
 	public override void _ExitTree()
 	{
+		if( Input.Singleton.IsConnected( Input.SignalName.JoyConnectionChanged, Callable.From<long, bool>(OnJoyConnectionChangedEventHandler) ) )
+		{
+			Input.JoyConnectionChanged -= OnJoyConnectionChangedEventHandler;
+		}
 		Mapper = null;
 	}
 
@@ -172,7 +194,6 @@ public partial class ControllerIcons : Node
 		// Wait a frame to give a chance for the app to initialize
 		setLikelyInput = true;
 	}
-
 	private void OnJoyConnectionChangedEventHandler( long device, bool connected )
 	{
 		if( connected )
@@ -194,6 +215,11 @@ public partial class ControllerIcons : Node
 
 	public override void _Input( InputEvent e )
 	{
+		//Input can fire before controller is ready, typically
+		//during hotreload
+		if( !IsControllerIconsPluginReady() )
+			return;
+
 		EInputType inputType = LastInputType;
 		int controller = LastController;
 		switch( e.GetClass() )
@@ -291,8 +317,12 @@ public partial class ControllerIcons : Node
 
 	private void refresh()
 	{
-		// All it takes is to signal icons to refresh paths
-		EmitSignalInputTypeChanged(LastInputType, LastController);
+		// All it takes is to signal icons to refresh paths		
+	#if GODOT4_4_OR_GREATER
+		EmitSignalInputTypeChanged((int)LastInputType, LastController);
+	#else
+		EmitSignal(SignalName.InputTypeChanged, (int)LastInputType, LastController);
+	#endif
 	}
 
 	private ControllerSettings.Devices GetJoypadType( int controller = int.MinValue )
@@ -339,12 +369,12 @@ public partial class ControllerIcons : Node
 	public List<Texture2D> ParseEventModifiers(InputEvent e )
 	{
 		if( e == null || e is not InputEventWithModifiers )
-			return [];
+			return new();
 
 		InputEventWithModifiers eModifiers = e as InputEventWithModifiers;
 
-		List<Texture2D> icons = [];
-		List<string> modifiers = [];
+		List<Texture2D> icons = new();
+		List<string> modifiers = new();
 		if( eModifiers.CommandOrControlAutoremap )
 		{
 			switch( OS.GetName() )
@@ -425,10 +455,10 @@ public partial class ControllerIcons : Node
 		if( string.IsNullOrWhiteSpace(path) )
 			return null;
 
-		List<string> basePaths = [
+		List<string> basePaths = new(){
 			Settings.custom_asset_dir + "/",
 			"res://addons/controller_icons/assets/"
-		];
+		};
 
 		foreach( string basePath in basePaths )
 		{
@@ -473,7 +503,7 @@ public partial class ControllerIcons : Node
 		else
 			events = InputMap.ActionGetEvents(path);
 
-		List<InputEvent> fallbacks = [];
+		List<InputEvent> fallbacks = new();
 		foreach( InputEvent inputEvent in events )
 		{
 			if( !IsInstanceValid(inputEvent) ) continue;
@@ -509,11 +539,11 @@ public partial class ControllerIcons : Node
 
 	private List<string> ExpandPath(string path, EInputType inputType, int controller, ControllerSettings.Devices forceControllerIconStyle = ControllerSettings.Devices.NONE)
 	{
-		List<string> paths = [];
-		List<string> basePaths = [
+		List<string> paths = new();
+		List<string> basePaths = new(){
 			Settings.custom_asset_dir + "/",
 			"res://addons/controller_icons/assets/"
-		];
+		};
 		foreach( string basePath in basePaths )
 		{
 			if( string.IsNullOrWhiteSpace(basePath) )

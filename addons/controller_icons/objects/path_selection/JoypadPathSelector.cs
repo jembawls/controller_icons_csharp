@@ -8,7 +8,7 @@ using static ControllerIcons;
 public partial class JoypadPathSelector : SelectorPanel
 {
 	[Signal]
-	private delegate void DoneEventHandler();
+	public delegate void DoneEventHandler();
 
 	private Label ButtonLabel;
 	private Godot.Collections.Array<Button> ButtonNodes;
@@ -19,7 +19,7 @@ public partial class JoypadPathSelector : SelectorPanel
 	public override void _Ready()
 	{
 		ButtonLabel = GetNode<Label>("%ButtonLabel");
-		ButtonNodes = [
+		ButtonNodes = new(){
 			GetNode<Button>("%LT"), GetNode<Button>("%RT"),
 			GetNode<Button>("%LStick"), GetNode<Button>("%RStick"),
 			GetNode<Button>("%LStickClick"), GetNode<Button>("%RStickClick"),
@@ -28,7 +28,7 @@ public partial class JoypadPathSelector : SelectorPanel
 			GetNode<Button>("%Home"), GetNode<Button>("%Share"), GetNode<Button>("%DPAD"),
 			GetNode<Button>("%DPADDown"), GetNode<Button>("%DPADRight"),
 			GetNode<Button>("%DPADLeft"), GetNode<Button>("%DPADUp")
-		];	
+		};
 	}
 
 	public void Populate( EditorInterface editorInterface )
@@ -168,8 +168,14 @@ public partial class JoypadPathSelector : SelectorPanel
 			{
 				if( LastPressedButton == button )
 				{
-					if( Time.GetTicksMsec() < LastPressedTimestamp )
+					if (Time.GetTicksMsec() < LastPressedTimestamp)
+					{
+					#if GODOT4_4_OR_GREATER
 						EmitSignalDone();
+					#else
+						EmitSignal(SignalName.Done);
+					#endif
+					}
 					else
 						LastPressedTimestamp = Time.GetTicksMsec() + 1000;
 				}

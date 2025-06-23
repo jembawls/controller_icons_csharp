@@ -8,7 +8,7 @@ using static ControllerIcons;
 public partial class SpecificPathSelector : SelectorPanel
 {
 	[Signal]
-	private delegate void DoneEventHandler();
+	public delegate void DoneEventHandler();
 
 	private LineEdit NameFilter;
 	private Tree BaseAssetNames;
@@ -20,8 +20,10 @@ public partial class SpecificPathSelector : SelectorPanel
 	private Color ColorTextEnabled;
 	private Color ColorTextDisabled;
 	
-	Dictionary<string,Dictionary<string,ControllerIcons_Icon>> ButtonNodes = [];
+	Dictionary<string,Dictionary<string,ControllerIcons_Icon>> ButtonNodes = new();
 	TreeItem AssetNamesRoot;
+
+	public bool IsSignalsConnected { get; private set; }
 
 	public override void _Ready()
 	{
@@ -29,9 +31,43 @@ public partial class SpecificPathSelector : SelectorPanel
 		BaseAssetNames = GetNode<Tree>("%BaseAssetNames");
 		AssetsContainer = GetNode<HFlowContainer>("%AssetsContainer");
 	}
+	
+	//hooks up signals for EXISTING icons
+	public void HookupSignals()
+	{
+		if( IsSignalsConnected )
+			return;
+
+		foreach( Dictionary<string, ControllerIcons_Icon> category in ButtonNodes.Values )
+		{
+			foreach( ControllerIcons_Icon icon in category.Values )
+			{
+				icon.Button.Pressed += icon.OnIconPressed;
+			}
+		}
+
+		IsSignalsConnected = true;
+	}
+	
+	public void CleanupSignals()
+	{ 
+		if( !IsSignalsConnected )
+			return;
+
+		foreach( Dictionary<string, ControllerIcons_Icon> category in ButtonNodes.Values )
+		{
+			foreach( ControllerIcons_Icon icon in category.Values )
+			{
+				icon.Button.Pressed -= icon.OnIconPressed;
+			}
+		}
+
+		IsSignalsConnected = false;
+	}
 
 	class ControllerIcons_Icon
 	{
+		public static SpecificPathSelector PathSelector;
 		public static ButtonGroup group = new();
 
 		public Button Button;
@@ -72,9 +108,9 @@ public partial class SpecificPathSelector : SelectorPanel
 
 		public ControllerIcons_Icon( string category, string path)
 		{
-			this.Category = category;
+			Category = category;
 			Filtered = true;
-			this.Path = path.Split("/")[1];
+			Path = path.Split("/")[1];
 
 			Button = new()
 			{
@@ -94,6 +130,28 @@ public partial class SpecificPathSelector : SelectorPanel
 				path = path
 			};
 			Button.Icon = icon;
+		}
+
+		public void OnIconPressed()
+		{
+			if( PathSelector._LastPressedIcon == this )
+			{
+				if (Time.GetTicksMsec() < PathSelector._LastPressedTimestamp)
+				{
+				#if GODOT4_4_OR_GREATER
+					PathSelector.EmitSignalDone();
+				#else
+					PathSelector.EmitSignal(SignalName.Done);
+				#endif					
+				}
+				else
+					PathSelector._LastPressedTimestamp = Time.GetTicksMsec() + 1000;
+			}
+			else
+			{
+				PathSelector._LastPressedIcon = this;
+				PathSelector._LastPressedTimestamp = Time.GetTicksMsec() + 1000;
+			}
 		}
 	}
 
@@ -120,10 +178,13 @@ public partial class SpecificPathSelector : SelectorPanel
 
 		AssetNamesRoot = BaseAssetNames.CreateItem();
 
-		Godot.Collections.Array<string> basePaths = [
+		Godot.Collections.Array<string> basePaths = new(){
 			CI.Settings.custom_asset_dir,
 			"res://addons/controller_icons/assets"
-		];
+		};
+
+		//Update the static reference to this now
+		ControllerIcons_Icon.PathSelector = this;
 
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
@@ -142,6 +203,8 @@ public partial class SpecificPathSelector : SelectorPanel
 				HandleFiles(dir, basePath.PathJoin(dir));
 			}
 		}
+
+		IsSignalsConnected = true;
 
 		TreeItem child = AssetNamesRoot.GetNextInTree();
 		child?.Select(0);
@@ -162,7 +225,7 @@ public partial class SpecificPathSelector : SelectorPanel
 		
 		if( !ButtonNodes.ContainsKey(mapCategory) )
 		{
-			ButtonNodes[mapCategory] = [];
+			ButtonNodes[mapCategory] = new();
 			TreeItem item = BaseAssetNames.CreateItem(AssetNamesRoot);
 			item.SetText(0, mapCategory);
 		}
@@ -171,25 +234,12 @@ public partial class SpecificPathSelector : SelectorPanel
 		if( ButtonNodes[mapCategory].ContainsKey(filename) ) return;
 
 		string icon_path = (category.Length == 0 ? "" : category ) + "/" + path.GetFile().GetBaseName();
-		ControllerIcons_Icon icon = new(mapCategory, icon_path);
+		ControllerIcons_Icon icon = new( mapCategory, icon_path);
 
 		ButtonNodes[mapCategory][filename] = icon;
 		AssetsContainer.AddChild(icon.Button);
 
-		icon.Button.Pressed += () => {
-			if( _LastPressedIcon == icon )
-			{
-				if( Time.GetTicksMsec() < _LastPressedTimestamp )
-					EmitSignalDone();
-				else
-					_LastPressedTimestamp = Time.GetTicksMsec() + 1000;
-			}
-			else
-			{
-				_LastPressedIcon = icon;
-				_LastPressedTimestamp = Time.GetTicksMsec() + 1000;
-			}
-		};		
+		icon.Button.Pressed += icon.OnIconPressed;	 	
 	}
 
 	public string GetIconPath()
@@ -228,7 +278,7 @@ public partial class SpecificPathSelector : SelectorPanel
 
 	private void OnNameFilterTextChanged( string new_text )
 	{
-		Godot.Collections.Dictionary<string,bool> any_visible = [];
+		Godot.Collections.Dictionary<string,bool> any_visible = new();
 		TreeItem asset_name = AssetNamesRoot.GetNextInTree();
 		while( asset_name != null )
 		{
@@ -266,6 +316,5 @@ public partial class SpecificPathSelector : SelectorPanel
 
 			asset_name = asset_name.GetNextInTree();
 		}
-
 	}
 }
