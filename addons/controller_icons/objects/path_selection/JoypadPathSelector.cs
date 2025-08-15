@@ -1,4 +1,4 @@
-
+#if TOOLS
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -295,3 +295,4 @@ public partial class JoypadPathSelector : SelectorPanel
 		ButtonLabel.Text = "Button 11\n(D-pad Up)\n[joypad/dpad_up]";
 	}
 }
+#endif

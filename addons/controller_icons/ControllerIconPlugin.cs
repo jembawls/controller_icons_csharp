@@ -1,3 +1,4 @@
+#if TOOLS
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -30,7 +31,7 @@ public partial class ControllerIconPlugin : EditorPlugin
 
 	public override void _DisablePlugin()
 	{
-		RemoveAutoloadSingleton("ControllerIcons");
+		RemoveAutoloadSingleton("ControllerIcons"); 
 	}
 
 	public override void _EnterTree()
@@ -48,3 +49,4 @@ public partial class ControllerIconPlugin : EditorPlugin
 		RemoveInspectorPlugin(inspectorPlugin);
 	}
 }
+#endif

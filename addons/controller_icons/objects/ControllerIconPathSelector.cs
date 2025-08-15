@@ -1,4 +1,4 @@
-
+#if TOOLS
 using Godot;
 using System;
 
@@ -137,3 +137,4 @@ public partial class ControllerIconPathSelector : PanelContainer
 		nSpecificPath.CleanupSignals();
 	}
 }
+#endif

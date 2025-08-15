@@ -1,4 +1,4 @@
-
+#if TOOLS
 using Godot;
 using System;
 
@@ -58,3 +58,4 @@ public partial class ControllerIconPathSelectorPopup : ConfirmationDialog
 		nSelector.Cleanup();
 	}
 }
+#endif
