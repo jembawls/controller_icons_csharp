@@ -213,41 +213,40 @@ public partial class ControllerIcons : Node
 		}
 	}
 
-	public override void _Input( InputEvent e )
+	public override void _Input(InputEvent ev)
 	{
-		//Input can fire before controller is ready, typically
-		//during hotreload
-		if( !IsControllerIconsPluginReady() )
-			return;
+		//Input can fire before controller is ready, typically during hotreload
+		if (!IsControllerIconsPluginReady()) return;
 
-		EInputType inputType = LastInputType;
+		var inputType = LastInputType;
 		int controller = LastController;
-		switch( e.GetClass() )
+		switch (ev)
 		{
-			case "InputEventKey":
-			case "InputEventMouseButton":
+			case InputEventKey or InputEventMouseButton:
+			{
 				inputType = EInputType.KEYBOARD_MOUSE;
 				break;
-			case "InputEventMouseMotion":
-				if( Settings.allow_mouse_remap && TestMouseVelocity((e as InputEventMouseMotion).Relative) )
-				{
-					inputType = EInputType.KEYBOARD_MOUSE;
-				}
+			}
+			case InputEventMouseMotion eventMouseMotion when (Settings.allow_mouse_remap && TestMouseVelocity(eventMouseMotion.Relative)):
+			{
+				inputType = EInputType.KEYBOARD_MOUSE;
 				break;
-			case "InputEventJoypadButton":
+			}
+			case InputEventJoypadButton:
+			{
 				inputType = EInputType.CONTROLLER;
-				controller = e.Device;
+				controller = ev.Device;
 				break;
-			case "InputEventJoypadMotion":
-				if( Mathf.Abs((e as InputEventJoypadMotion).AxisValue) > Settings.joypad_deadzone )
-				{
-					inputType = EInputType.CONTROLLER;
-					controller = e.Device;
-				}
+			}
+			case InputEventJoypadMotion eventJoyMotion when (Mathf.Abs(eventJoyMotion.AxisValue) > Settings.joypad_deadzone):
+			{
+				inputType = EInputType.CONTROLLER;
+				controller = ev.Device;
 				break;
+			}
 		}
 
-		if( inputType != LastInputType || controller != LastController )
+		if (inputType != LastInputType || controller != LastController)
 		{
 			SetLastInputType(inputType, controller);
 		}
@@ -485,52 +484,39 @@ public partial class ControllerIcons : Node
 			return EPathType.SPECIFIC_PATH;
 	}
 
-	public InputEvent GetMatchingEvent( string path, EInputType inputType = EInputType.NONE, long controller = int.MinValue )
+	public InputEvent GetMatchingEvent(string path, EInputType inputType = EInputType.NONE, long controller = int.MinValue)
 	{
-		if( inputType == EInputType.NONE )
+		if (inputType == EInputType.NONE)
 		{
 			inputType = LastInputType;
 		}
-		
-		if( controller == int.MinValue )
+
+		if (controller == int.MinValue)
 		{
 			controller = LastController;
 		}
 
-		Godot.Collections.Array<InputEvent> events;
-		if( CustomInputActions.TryGetValue(path, out Godot.Collections.Array<InputEvent> value) )
-			events = value;
-		else
-			events = InputMap.ActionGetEvents(path);
+		var events = CustomInputActions.TryGetValue(path, out Godot.Collections.Array<InputEvent> value) ? value : InputMap.ActionGetEvents(path);
+		var fallbacks = new List<InputEvent>();
 
-		List<InputEvent> fallbacks = new();
-		foreach( InputEvent inputEvent in events )
+		foreach (InputEvent ev in events)
 		{
-			if( !IsInstanceValid(inputEvent) ) continue;
+			if (!IsInstanceValid(ev)) continue;
 
-			switch( inputEvent.GetClass() )
+			if (ev is InputEventKey || ev is InputEventMouse || ev is InputEventMouseMotion || ev is InputEventMouseButton)
 			{
-				case "InputEventKey":
-				case "InputEventMouse":
-				case "InputEventMouseMotion":
-				case "InputEventMouseButton":
-					if( inputType == EInputType.KEYBOARD_MOUSE )
-						return inputEvent;
-					break;
-				case "InputEventJoypadButton":
-				case "InputEventJoypadMotion":
-					if( inputType == EInputType.CONTROLLER )
-					{
-						// Use the first device specific mapping if there is one.
-						if( inputEvent.Device == controller )
-							return inputEvent;
-						// Otherwise use the first "all devices" mapping.
-						if( inputEvent.Device < 0 ) // All-device event
-							fallbacks.Insert(0, inputEvent );
-						else
-							fallbacks.Add(inputEvent);
-					}
-				break;
+				if (inputType == EInputType.KEYBOARD_MOUSE) return ev;
+			}
+			else if (ev is InputEventJoypadButton || ev is InputEventJoypadMotion)
+			{
+				if (inputType == EInputType.CONTROLLER)
+				{
+					// Use the first device specific mapping if there is one.
+					// Otherwise use the first "all devices" mapping.
+					if (ev.Device == controller) return ev;
+					if (ev.Device < 0) fallbacks.Insert(0, ev); // All-device event
+					else fallbacks.Add(ev);
+				}
 			}
 		}
 
