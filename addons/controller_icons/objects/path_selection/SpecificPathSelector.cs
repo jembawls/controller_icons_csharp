@@ -110,7 +110,8 @@ public partial class SpecificPathSelector : SelectorPanel
 		{
 			Category = category;
 			Filtered = true;
-			Path = path.Split("/")[1];
+			var parts = path.Split('/');
+			Path = parts.Length > 1 ? parts[1] : path;
 
 			Button = new()
 			{
@@ -233,7 +234,7 @@ public partial class SpecificPathSelector : SelectorPanel
 		string filename = path.GetFile();
 		if( ButtonNodes[mapCategory].ContainsKey(filename) ) return;
 
-		string icon_path = (category.Length == 0 ? "" : category ) + "/" + path.GetFile().GetBaseName();
+		string icon_path = (category.Length == 0 ? "" : category + "/") + path.GetFile().GetBaseName();
 		ControllerIcons_Icon icon = new( mapCategory, icon_path);
 
 		ButtonNodes[mapCategory][filename] = icon;
@@ -250,9 +251,9 @@ public partial class SpecificPathSelector : SelectorPanel
 		return "";
 	}
 
-	public override void GrabFocus()
+	public override void GrabFocus( bool hideFocus = false )
 	{
-		NameFilter.GrabFocus();
+		GrabFocusOn( NameFilter, hideFocus );
 	}
 
 	private void OnBaseAssetNamesItemSelected()

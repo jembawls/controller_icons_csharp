@@ -149,9 +149,9 @@ public partial class InputActionSelector : SelectorPanel
 		}
 	}
 
-	public override void GrabFocus()
+	public override void GrabFocus( bool hideFocus = false )
 	{
-		nNameFilter.GrabFocus();
+		GrabFocusOn( nNameFilter, hideFocus );
 	}
 
 	private void OnBuiltInActionButtonToggled( bool toggled_on )

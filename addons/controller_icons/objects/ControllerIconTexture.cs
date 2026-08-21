@@ -198,7 +198,7 @@ public partial class ControllerIconTexture : Texture2D
 	public string GetTTSString()
 	{
 		if( force_type != EInputType.NONE )
-			return CI.ParsePathToTTS(path, force_type - 1);
+			return CI.ParsePathToTTS(path, force_type);
 		else
 			return CI.ParsePathToTTS(path);
 	}
@@ -443,9 +443,9 @@ public partial class ControllerIconTexture : Texture2D
 				);
 
 				DrawText(toCanvasItem, font_position, "+");
+				position += new Vector2(TextSize.X, 0);
 			}
 
-			position += new Vector2(TextSize.X, 0);
 			tex.Draw(toCanvasItem, position, modulate, transpose);
 			position += new Vector2( tex.GetWidth(), 0 );
 		}
@@ -616,6 +616,7 @@ public partial class ControllerIconTexture : Texture2D
 		IsStitchingTexture = false;
 
 		Dirty = false;
+		img.GenerateMipmaps();
 		Texture3D = ImageTexture.CreateFromImage(img);
 		EmitChanged();
 	}
@@ -630,18 +631,17 @@ public partial class ControllerIconTexture : Texture2D
 		if( Dirty )
 		{
 			if( !IsStitchingTexture )
+			{
 				// FIXME: Function may await, but because this is an internal engine call, we can't do anything about it.
 				// This results in a one-frame white texture being displayed, which is not ideal. Investigate later.
 				StitchTexture();
-				
-			if( IsStitchingTexture )
-				return new Rid(null);
-
+				if( IsStitchingTexture )
+					return new Rid(null);
+			}
 			else
 			{
 				return new Rid(null);
 			}
-				
 		}
 		return Textures.Count > 0 ? Texture3D.GetRid() : new Rid(null);
 	}

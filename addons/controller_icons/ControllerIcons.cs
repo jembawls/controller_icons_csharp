@@ -184,6 +184,7 @@ public partial class ControllerIcons : Node
 		Input.JoyConnectionChanged += OnJoyConnectionChangedEventHandler;
 
 		Settings ??= new();
+		ApplyCustomMapper();
 		Mapper ??= new();
 
 		if( !string.IsNullOrWhiteSpace(Settings.custom_file_extension) )
@@ -193,6 +194,23 @@ public partial class ControllerIcons : Node
 
 		// Wait a frame to give a chance for the app to initialize
 		setLikelyInput = true;
+	}
+
+	private void ApplyCustomMapper()
+	{
+		if( Settings?.custom_mapper == null )
+			return;
+
+		Variant created;
+		if( Settings.custom_mapper is CSharpScript csharpScript )
+			created = csharpScript.New();
+		else
+			created = Settings.custom_mapper.Call("new");
+
+		if( created.AsGodotObject() is ControllerMapper mapper )
+			Mapper = mapper;
+		else
+			GD.PrintErr("Controller Icons: custom_mapper must extend ControllerMapper.");
 	}
 	private void OnJoyConnectionChangedEventHandler( long device, bool connected )
 	{
@@ -304,10 +322,9 @@ public partial class ControllerIcons : Node
 				if( f.Target != null && f.Delegate != null ) 
 					f.Call();
 			}
+			_CachedCallables.Clear();
+			_CachedCallablesLock.Unlock();
 		}
-
-		_CachedCallables.Clear();
-		_CachedCallablesLock.Unlock();
 	}
 
 	private void AddCustomInputAction( string input_action , Godot.Collections.Array<InputEvent> events )
@@ -315,7 +332,7 @@ public partial class ControllerIcons : Node
 		CustomInputActions[input_action] = events;
 	}
 
-	private void refresh()
+	public void Refresh()
 	{
 		// All it takes is to signal icons to refresh paths		
 	#if GODOT4_4_OR_GREATER
@@ -423,6 +440,7 @@ public partial class ControllerIcons : Node
 				if( LoadIcon( iconPath ) == Error.Ok )
 				{
 					icons.Add( _CachedIcons[iconPath] );
+					break;
 				}
 			}
 		}
@@ -456,16 +474,17 @@ public partial class ControllerIcons : Node
 			return null;
 
 		List<string> basePaths = new(){
-			Settings.custom_asset_dir + "/",
-			"res://addons/controller_icons/assets/"
+			Settings.custom_asset_dir,
+			"res://addons/controller_icons/assets"
 		};
 
-		foreach( string basePath in basePaths )
+		foreach( string rawBasePath in basePaths )
 		{
+			string basePath = rawBasePath.SimplifyPath();
 			if( string.IsNullOrWhiteSpace(basePath) )
 				continue;
 
-			string dictPath = basePath + path + "." + BaseExtension;
+			string dictPath = basePath.PathJoin( $"{path}.{BaseExtension}" );
 			if( LoadIcon(dictPath) != Error.Ok )
 				continue;
 

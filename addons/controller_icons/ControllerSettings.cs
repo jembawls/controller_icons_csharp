@@ -53,7 +53,7 @@ public partial class ControllerSettings : Resource
 
 	// Custom generic joystick mapper script
 	[Export]
-	private Script custom_mapper;
+	public Script custom_mapper;
 
 	// Custom icon file extension
 	[Export]
