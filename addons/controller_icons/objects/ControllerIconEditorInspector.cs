@@ -1,3 +1,4 @@
+#nullable enable
 #if TOOLS
 using Godot;
 using System;
@@ -7,7 +8,7 @@ using static ControllerIcons;
 [Tool]
 public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 {
-	private ControllerIcons_TexturePreview preview;
+	private ControllerIcons_TexturePreview? preview;
 
 	class ControllerIcons_TexturePreview
 	{
@@ -16,16 +17,16 @@ public partial class ControllerIconEditorInspector : EditorInspectorPlugin
 		private TextureRect nIconTexture;
 		private Texture2D BackgroundTexture;
 
-		public Texture2D Texture
+		public Texture2D? Texture
 		{
-			get { return _Texture;  }
+			get => _Texture;
 			set
 			{
 				_Texture = value;
 				nIconTexture.Texture = _Texture;
 			}
 		}
-		private Texture2D _Texture;
+		private Texture2D? _Texture;
 
 		public ControllerIcons_TexturePreview(EditorInterface editorInterface)
 		{

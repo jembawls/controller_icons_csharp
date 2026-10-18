@@ -1,3 +1,4 @@
+#nullable enable
 #if TOOLS
 using Godot;
 using System;
@@ -10,15 +11,19 @@ public partial class JoypadPathSelector : SelectorPanel
 	[Signal]
 	public delegate void DoneEventHandler();
 
-	private Label ButtonLabel;
-	private Godot.Collections.Array<Button> ButtonNodes;
 
-	private Button LastPressedButton;
+	private Label? _buttonLabel;
+
+	private Label ButtonLabel => _buttonLabel ?? throw new InvalidOperationException("JoypadPathSelector is not ready.");
+
+	private Godot.Collections.Array<Button>? ButtonNodes;
+
+	private Button? LastPressedButton;
 	private ulong LastPressedTimestamp;
 
 	public override void _Ready()
 	{
-		ButtonLabel = GetNode<Label>("%ButtonLabel");
+		_buttonLabel = GetNode<Label>("%ButtonLabel");
 		ButtonNodes = new(){
 			GetNode<Button>("%LT"), GetNode<Button>("%RT"),
 			GetNode<Button>("%LStick"), GetNode<Button>("%RStick"),
@@ -36,19 +41,25 @@ public partial class JoypadPathSelector : SelectorPanel
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for button:Button in button_nodes:
+		if( ButtonNodes is null )
+			return;
+
 		foreach( Button button in ButtonNodes )
 			button.ButtonPressed = false;
 	}
 
 	public string GetIconPath()
 	{
+		if( ButtonNodes is null )
+			return "";
+
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for button:Button in button_nodes:
 		foreach( Button button in ButtonNodes )
 		{
-			if( button.ButtonPressed )
-				return ( button.Icon as ControllerIconTexture ).path;
+			if( button.ButtonPressed && button.Icon is ControllerIconTexture icon )
+				return icon.path;
 		}
 
 		return "";
@@ -157,6 +168,9 @@ public partial class JoypadPathSelector : SelectorPanel
 
 	private void OnButtonPressed()
 	{
+		if( ButtonNodes is null )
+			return;
+
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:
 		// for button:Button in button_nodes:

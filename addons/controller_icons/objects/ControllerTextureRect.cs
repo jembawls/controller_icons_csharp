@@ -1,3 +1,4 @@
+#nullable enable
 // Controller icon for TextureRect nodes.
 //
 // [b]Deprecated[/b]: Use the new [ControllerIconTexture] texture resource and set it
@@ -21,10 +22,7 @@ public partial class ControllerTextureRect : TextureRect
 
 	[Export]
 	public string path { 
-		get 
-		{ 
-			return _path;
-		}
+		get => _path;
 
 		set 
 		{
@@ -39,10 +37,7 @@ public partial class ControllerTextureRect : TextureRect
 
 	[Export]
 	public EShowMode show_only {
-		get 
-		{
-			return _show_only;
-		}
+		get => _show_only;
 
 		set
 		{
@@ -57,10 +52,7 @@ public partial class ControllerTextureRect : TextureRect
 	[Export]
 	public EInputType force_type
 	{
-		get
-		{
-			return _force_type;
-		}
+		get => _force_type;
 
 		set
 		{
@@ -75,10 +67,7 @@ public partial class ControllerTextureRect : TextureRect
 	[Export]
 	public int max_width
 	{
-		get
-		{
-			return _max_width;
-		}
+		get => _max_width;
 
 		set
 		{

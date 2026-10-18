@@ -1,3 +1,4 @@
+#nullable enable
 #if TOOLS
 using Godot;
 using System;
@@ -7,18 +8,13 @@ using System.Linq;
 [Tool]
 public partial class ControllerIconPlugin : EditorPlugin
 {
-	private ControllerIconEditorInspector inspectorPlugin;
-	public static EditorInterface EditorInterface 
-	{ 
-		get
-		{
-		#if GODOT4_2_OR_GREATER
-			return EditorInterface.Singleton;
-		#else
-			return staticRef.GetEditorInterface();
-		#endif
-		}
-	}
+	private ControllerIconEditorInspector? inspectorPlugin;
+	public static EditorInterface EditorInterface =>
+	#if GODOT4_2_OR_GREATER
+		EditorInterface.Singleton;
+	#else
+		staticRef.GetEditorInterface();
+	#endif
 	
 #if GODOT4_1
 	private static ControllerIconPlugin staticRef { get; set; }
@@ -46,7 +42,8 @@ public partial class ControllerIconPlugin : EditorPlugin
 
 	public override void _ExitTree()
 	{
-		RemoveInspectorPlugin(inspectorPlugin);
+		if (inspectorPlugin is not null)
+			RemoveInspectorPlugin(inspectorPlugin);
 	}
 }
 #endif

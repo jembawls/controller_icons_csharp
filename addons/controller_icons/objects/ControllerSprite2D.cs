@@ -1,3 +1,4 @@
+#nullable enable
 // Controller icon for Sprite2D nodes.
 //
 // [b]Deprecated[/b]: Use the new [ControllerIconTexture] texture resource and set it
@@ -21,10 +22,7 @@ public partial class ControllerSprite2D : Sprite2D
 
 	[Export]
 	public string path { 
-		get 
-		{ 
-			return _path;
-		}
+		get => _path;
 
 		set 
 		{
@@ -37,10 +35,7 @@ public partial class ControllerSprite2D : Sprite2D
 
 	[Export]
 	public EShowMode show_only {
-		get 
-		{
-			return _show_only;
-		}
+		get => _show_only;
 
 		set
 		{
@@ -55,10 +50,7 @@ public partial class ControllerSprite2D : Sprite2D
 	[Export]
 	public EInputType force_type
 	{
-		get
-		{
-			return _force_type;
-		}
+		get => _force_type;
 
 		set
 		{

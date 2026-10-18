@@ -1,3 +1,4 @@
+#nullable enable
 #if TOOLS
 using Godot;
 using System;
@@ -8,9 +9,9 @@ public partial class ControllerIconPathSelectorPopup : ConfirmationDialog
 	[Signal]
 	public delegate void PathSelectedEventHandler(string path);
 
-	public EditorInterface EditorInterface;
+	public EditorInterface? EditorInterface;
 
-	private ControllerIconPathSelector nSelector;
+	private ControllerIconPathSelector? nSelector;
 
 	public override void _Ready()
 	{
@@ -22,7 +23,8 @@ public partial class ControllerIconPathSelectorPopup : ConfirmationDialog
 
 	public void Populate()
 	{
-		nSelector.Populate(EditorInterface);
+		if( nSelector is not null && EditorInterface is not null )
+			nSelector.Populate(EditorInterface);
 	} 
 
 	private void OnControllerIconPathSelectorPathSelected( string path )
@@ -39,6 +41,9 @@ public partial class ControllerIconPathSelectorPopup : ConfirmationDialog
 
 	private void OnConfirmed()
 	{		
+		if( nSelector is null )
+			return;
+
 	#if GODOT4_4_OR_GREATER
 		EmitSignalPathSelected(nSelector.GetIconPath());
 	#else
@@ -55,7 +60,7 @@ public partial class ControllerIconPathSelectorPopup : ConfirmationDialog
 
 	private void Cleanup()
 	{
-		nSelector.Cleanup();
+		nSelector?.Cleanup();
 	}
 }
 #endif

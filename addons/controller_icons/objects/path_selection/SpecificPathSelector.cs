@@ -1,3 +1,4 @@
+#nullable enable
 #if TOOLS
 using Godot;
 using System;
@@ -10,18 +11,19 @@ public partial class SpecificPathSelector : SelectorPanel
 	[Signal]
 	public delegate void DoneEventHandler();
 
-	private LineEdit NameFilter;
-	private Tree BaseAssetNames;
-	private HFlowContainer AssetsContainer;
 
-	private ControllerIcons_Icon _LastPressedIcon;
+	private LineEdit? NameFilter;
+	private Tree? BaseAssetNames;
+	private HFlowContainer? AssetsContainer;
+
+	private ControllerIcons_Icon? _LastPressedIcon;
 	private ulong _LastPressedTimestamp;
 
 	private Color ColorTextEnabled;
 	private Color ColorTextDisabled;
 	
 	Dictionary<string,Dictionary<string,ControllerIcons_Icon>> ButtonNodes = new();
-	TreeItem AssetNamesRoot;
+	TreeItem? AssetNamesRoot;
 
 	public bool IsSignalsConnected { get; private set; }
 
@@ -67,7 +69,7 @@ public partial class SpecificPathSelector : SelectorPanel
 
 	class ControllerIcons_Icon
 	{
-		public static SpecificPathSelector PathSelector;
+		public static SpecificPathSelector? PathSelector;
 		public static ButtonGroup group = new();
 
 		public Button Button;
@@ -76,7 +78,7 @@ public partial class SpecificPathSelector : SelectorPanel
 
 		public bool Selected
 		{
-			get	{ return _Selected; }
+			get	=> _Selected;
 			set
 			{
 				_Selected = value;
@@ -88,7 +90,7 @@ public partial class SpecificPathSelector : SelectorPanel
 
 		public bool Filtered
 		{
-			get	{ return _Filtered; }
+			get	=> _Filtered;
 			set
 			{
 				_Filtered = value;
@@ -134,6 +136,9 @@ public partial class SpecificPathSelector : SelectorPanel
 
 		public void OnIconPressed()
 		{
+			if( PathSelector is null )
+				return;
+
 			if( PathSelector._LastPressedIcon == this )
 			{
 				if (Time.GetTicksMsec() < PathSelector._LastPressedTimestamp)
@@ -157,6 +162,9 @@ public partial class SpecificPathSelector : SelectorPanel
 
 	public void Populate( EditorInterface editorInterface )
 	{
+		if( NameFilter is null || BaseAssetNames is null || AssetsContainer is null )
+			return;
+
 		// Using clear() triggers a signal and uses freed nodes.
 		// Setting the text directly does not.
 		NameFilter.Text = "";
@@ -221,6 +229,9 @@ public partial class SpecificPathSelector : SelectorPanel
 
 	private void CreateIcon( string category, string path )
 	{
+		if( BaseAssetNames is null || AssetsContainer is null )
+			return;
+
 		string mapCategory = category.Length == 0 ? "<no category>" : category;
 		
 		if( !ButtonNodes.ContainsKey(mapCategory) )
@@ -244,19 +255,22 @@ public partial class SpecificPathSelector : SelectorPanel
 
 	public string GetIconPath()
 	{
-		if (ControllerIcons_Icon.group.GetPressedButton() is Button button)
-			return (button.Icon as ControllerIconTexture).path;
+		if (ControllerIcons_Icon.group.GetPressedButton() is Button button && button.Icon is ControllerIconTexture icon)
+			return icon.path;
 
 		return "";
 	}
 
 	public override void GrabFocus()
 	{
-		NameFilter.GrabFocus();
+		NameFilter?.GrabFocus();
 	}
 
 	private void OnBaseAssetNamesItemSelected()
 	{
+		if( BaseAssetNames is null )
+			return;
+
 		TreeItem selected = BaseAssetNames.GetSelected();
 		if( selected == null ) return;
 
@@ -278,6 +292,9 @@ public partial class SpecificPathSelector : SelectorPanel
 
 	private void OnNameFilterTextChanged( string new_text )
 	{
+		if( AssetNamesRoot is null || BaseAssetNames is null )
+			return;
+
 		Godot.Collections.Dictionary<string,bool> any_visible = new();
 		TreeItem asset_name = AssetNamesRoot.GetNextInTree();
 		while( asset_name != null )
@@ -285,8 +302,6 @@ public partial class SpecificPathSelector : SelectorPanel
 			any_visible[asset_name.GetText(0)] = false;
 			asset_name = asset_name.GetNextInTree();
 		}
-		
-		TreeItem selectedCategory = BaseAssetNames.GetSelected();
 
 		// UPGRADE: In Godot 4.2, for-loop variables can be
 		// statically typed:

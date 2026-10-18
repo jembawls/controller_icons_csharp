@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -58,10 +59,7 @@ public partial class ControllerIconTexture : Texture2D
 	// [/codeblock]
 	[Export]
 	public string path { 
-		get 
-		{ 
-			return _path;
-		}
+		get => _path;
 
 		set 
 		{
@@ -75,10 +73,7 @@ public partial class ControllerIconTexture : Texture2D
 	// the icon will not occupy have any space (no width and height).	
 	[Export]
 	public EShowMode show_mode { 
-		get 
-		{ 
-			return _show_mode;
-		}
+		get => _show_mode;
 
 		set 
 		{
@@ -97,10 +92,7 @@ public partial class ControllerIconTexture : Texture2D
 	// other scenarios.
 	[Export]
 	public ControllerSettings.Devices force_controller_icon_style { 
-		get 
-		{ 
-			return _force_controller_icon_style;
-		}
+		get => _force_controller_icon_style;
 
 		set 
 		{
@@ -117,10 +109,7 @@ public partial class ControllerIconTexture : Texture2D
 	// other scenarios.
 	[Export]
 	public EInputType force_type { 
-		get 
-		{ 
-			return _force_type;
-		}
+		get => _force_type;
 
 		set 
 		{
@@ -155,10 +144,7 @@ public partial class ControllerIconTexture : Texture2D
 	// the icon will always show PlayStation 5 textures.
 	[Export]
 	public EForceDevice force_device { 
-		get 
-		{ 
-			return _force_device;
-		}
+		get => _force_device;
 
 		set 
 		{
@@ -171,11 +157,8 @@ public partial class ControllerIconTexture : Texture2D
 	[ExportSubgroup("Text Rendering")]
 	// Custom LabelSettings. If set, overrides the addon's global label settings.
 	[Export]
-	public LabelSettings custom_label_settings { 
-		get 
-		{ 
-			return _custom_label_settings;
-		}
+	public LabelSettings? custom_label_settings { 
+		get => _custom_label_settings;
 
 		set 
 		{
@@ -186,7 +169,7 @@ public partial class ControllerIconTexture : Texture2D
 			Textures = Textures;
 		} 
 	}
-	private LabelSettings _custom_label_settings;
+	private LabelSettings? _custom_label_settings;
 
 	// Returns a text representation of the displayed icon, useful for TTS
 	// (text-to-speech) scenarios.
@@ -215,10 +198,7 @@ public partial class ControllerIconTexture : Texture2D
 
 	public List<Texture2D> Textures
 	{
-		get
-		{
-			return _Textures;
-		}
+		get => _Textures;
 
 		set
 		{
@@ -239,18 +219,11 @@ public partial class ControllerIconTexture : Texture2D
 			if( _Textures != null && _Textures.Count > 1 )
 			{
 				LabelSettings = custom_label_settings;
-				if( LabelSettings == null )
-				{
-					LabelSettings = CI.Settings.custom_label_settings;
-				}
-
-				if( LabelSettings == null )
-				{
-					LabelSettings = new();
-				}
+				LabelSettings ??= CI.Settings.custom_label_settings;
+				LabelSettings ??= new();
 
 				LabelSettings.Changed += OnLabelSettingsChanged;
-				Font = LabelSettings.Font == null ? ThemeDB.FallbackFont : LabelSettings.Font;
+				Font = LabelSettings.Font ?? ThemeDB.FallbackFont;
 				OnLabelSettingsChanged();
 			}
 			// UPGRADE: In Godot 4.2, for-loop variables can be
@@ -258,16 +231,15 @@ public partial class ControllerIconTexture : Texture2D
 			// for tex:Texture in value:
 			foreach( Texture2D tex in value)
 			{
-				if( tex != null )
-					tex.Changed += ReloadResource;
+				tex.Changed += ReloadResource;
 			}
 		}
 	}
 	private List<Texture2D> _Textures = new();
 
 	private const int _NULL_SIZE = 2;
-	private Font Font;
-	private LabelSettings LabelSettings;
+	private Font? Font;
+	private LabelSettings? LabelSettings;
 	private Vector2 TextSize;
 	
 	public ControllerIconTexture()
@@ -290,7 +262,10 @@ public partial class ControllerIconTexture : Texture2D
 
 	public void OnLabelSettingsChanged() 
 	{		
-		Font = LabelSettings.Font == null ? ThemeDB.FallbackFont : LabelSettings.Font;
+		if( LabelSettings is null )
+			return;
+
+		Font = LabelSettings.Font ?? ThemeDB.FallbackFont;
 		TextSize = Font.GetStringSize("+", HorizontalAlignment.Left, -1, LabelSettings.FontSize);
 
 		ReloadResource();
@@ -322,11 +297,11 @@ public partial class ControllerIconTexture : Texture2D
 			EInputType input_type = force_type == EInputType.NONE ? CI.LastInputType : force_type;
 			if( CI.GetPathType(path) == EPathType.INPUT_ACTION )
 			{
-				InputEvent e = CI.GetMatchingEvent(path, input_type);
+				InputEvent? e = CI.GetMatchingEvent(path, input_type);
 				textures.AddRange(CI.ParseEventModifiers(e));				
 			}
 			int target_device = force_device != EForceDevice.ANY ? (int)force_device : CI.LastController;
-			Texture2D tex = CI.ParsePath(path, input_type, target_device, force_controller_icon_style);
+			Texture2D? tex = CI.ParsePath(path, input_type, target_device, force_controller_icon_style);
 			if( tex != null )
 				textures.Add(tex);
 		}
@@ -522,6 +497,9 @@ public partial class ControllerIconTexture : Texture2D
 
 	private void DrawText( Rid toCanvasItem, Vector2 fontPosition, string text )
 	{
+		if( Font is null || LabelSettings is null )
+			return;
+
 		fontPosition += new Vector2(0, Font.GetAscent(LabelSettings.FontSize));
 
 		if( LabelSettings.ShadowColor.A > 0 )
@@ -538,7 +516,7 @@ public partial class ControllerIconTexture : Texture2D
 		Font.DrawString(toCanvasItem, fontPosition, text, HorizontalAlignment.Center, -1, LabelSettings.FontSize, LabelSettings.FontColor);
 	}
 
-	private SubViewport HelperViewport;
+	private SubViewport? HelperViewport;
 	private bool IsStitchingTexture = false;
 	private async void StitchTexture()
 	{
@@ -547,7 +525,7 @@ public partial class ControllerIconTexture : Texture2D
 
 		IsStitchingTexture = true;
 
-		Image fontImage = null;
+		Image? fontImage = null;
 		if( Textures.Count > 1 )
 		{
 			// Generate a viewport to draw the text
@@ -587,7 +565,7 @@ public partial class ControllerIconTexture : Texture2D
 		{
 			if( Textures[i] == null ) continue;
 
-			if( i != 0 )
+			if( i != 0 && fontImage is not null )
 			{
 				// Draw text char '+'
 				Rect2I region = fontImage.GetUsedRect();
@@ -624,7 +602,7 @@ public partial class ControllerIconTexture : Texture2D
 	// For multi prompts, we need to generate a texture
 	private bool Dirty = true;
 
-	private Texture Texture3D;
+	private Texture? Texture3D;
 	public override Rid _GetRid()
 	{
 		if( Dirty )
@@ -635,14 +613,14 @@ public partial class ControllerIconTexture : Texture2D
 				StitchTexture();
 				
 			if( IsStitchingTexture )
-				return new Rid(null);
+				return default;
 
 			else
 			{
-				return new Rid(null);
+				return default;
 			}
 				
 		}
-		return Textures.Count > 0 ? Texture3D.GetRid() : new Rid(null);
+		return Textures.Count > 0 && Texture3D is not null ? Texture3D.GetRid() : default;
 	}
 }

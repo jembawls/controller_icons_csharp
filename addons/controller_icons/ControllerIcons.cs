@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 using Microsoft.VisualBasic;
 using System;
@@ -31,7 +32,13 @@ public partial class ControllerIcons : Node
 		CONTROLLER // Icon will be display only when a controller is being used.
 	}
 
-	public static ControllerIcons CI { get; set; }
+	private static ControllerIcons? _ci;
+
+	public static ControllerIcons CI
+	{
+		get => _ci ?? throw new InvalidOperationException("The ControllerIcons autoload is not ready.");
+		set => _ci = value;
+	}
 
 	private Godot.Collections.Dictionary<string, Texture2D> _CachedIcons = new();
 	public Godot.Collections.Dictionary<string, Godot.Collections.Array<InputEvent>> CustomInputActions = new();
@@ -41,7 +48,15 @@ public partial class ControllerIcons : Node
 
 	public EInputType LastInputType = EInputType.KEYBOARD_MOUSE;
 	public int LastController;
-	public ControllerSettings Settings;
+
+	private ControllerSettings? _settings;
+
+	public ControllerSettings Settings
+	{
+		get => _settings ?? throw new InvalidOperationException("The controller icons settings are not loaded.");
+		set => _settings = value;
+	}
+
 	public string BaseExtension = "png";
 
 	// Custom mouse velocity calculation, because Godot
@@ -52,7 +67,9 @@ public partial class ControllerIcons : Node
 
 	private bool setLikelyInput = false;
 
-	private ControllerMapper Mapper = new();
+	private ControllerMapper? _mapper;
+
+	private ControllerMapper Mapper => _mapper ?? throw new InvalidOperationException("The controller icons mapper is not initialized.");
 
 	// Default actions will be the builtin editor actions when
 	// the script is at editor ("tool") level. To pickup more
@@ -131,7 +148,7 @@ public partial class ControllerIcons : Node
 
 	public static bool IsControllerIconsPluginReady()
 	{
-		return CI != null && CI.Settings != null;
+		return _ci != null && _ci._settings != null;
 	}
 
 	public override void _ExitTree()
@@ -140,7 +157,7 @@ public partial class ControllerIcons : Node
 		{
 			Input.JoyConnectionChanged -= OnJoyConnectionChangedEventHandler;
 		}
-		Mapper = null;
+		_mapper = null;
 	}
 
 	public void ParseInputActions()
@@ -183,8 +200,8 @@ public partial class ControllerIcons : Node
 	{
 		Input.JoyConnectionChanged += OnJoyConnectionChangedEventHandler;
 
-		Settings ??= new();
-		Mapper ??= new();
+		_settings ??= new();
+		_mapper ??= new();
 
 		if( !string.IsNullOrWhiteSpace(Settings.custom_file_extension) )
 		{
@@ -229,7 +246,7 @@ public partial class ControllerIcons : Node
 				inputType = EInputType.KEYBOARD_MOUSE;
 				break;
 			case "InputEventMouseMotion":
-				if( Settings.allow_mouse_remap && TestMouseVelocity((e as InputEventMouseMotion).Relative) )
+				if( Settings.allow_mouse_remap && e is InputEventMouseMotion mouseMotion && TestMouseVelocity(mouseMotion.Relative) )
 				{
 					inputType = EInputType.KEYBOARD_MOUSE;
 				}
@@ -239,7 +256,7 @@ public partial class ControllerIcons : Node
 				controller = e.Device;
 				break;
 			case "InputEventJoypadMotion":
-				if( Mathf.Abs((e as InputEventJoypadMotion).AxisValue) > Settings.joypad_deadzone )
+				if( e is InputEventJoypadMotion joyMotion && Mathf.Abs(joyMotion.AxisValue) > Settings.joypad_deadzone )
 				{
 					inputType = EInputType.CONTROLLER;
 					controller = e.Device;
@@ -335,7 +352,7 @@ public partial class ControllerIcons : Node
 		return Mapper.GetJoypadType(controller, Settings.joypad_fallback);
 	}
 
-	public Texture2D ParsePath( string path, EInputType? inputType = EInputType.NONE, int lastController = int.MinValue, ControllerSettings.Devices forcedControllerIconStyle = ControllerSettings.Devices.NONE )
+	public Texture2D? ParsePath( string path, EInputType? inputType = EInputType.NONE, int lastController = int.MinValue, ControllerSettings.Devices forcedControllerIconStyle = ControllerSettings.Devices.NONE )
 	{		
 		if( inputType == null )
 		{
@@ -366,12 +383,10 @@ public partial class ControllerIcons : Node
 		return null;
 	}
 
-	public List<Texture2D> ParseEventModifiers(InputEvent e )
+	public List<Texture2D> ParseEventModifiers(InputEvent? e )
 	{
-		if( e == null || e is not InputEventWithModifiers )
+		if( e is not InputEventWithModifiers eModifiers )
 			return new();
-
-		InputEventWithModifiers eModifiers = e as InputEventWithModifiers;
 
 		List<Texture2D> icons = new();
 		List<string> modifiers = new();
@@ -449,7 +464,7 @@ public partial class ControllerIcons : Node
 		return ConvertAssetFileToTTS(tts.GetBaseName().GetFile());
 	}
 
-	private Texture ParseEvent( InputEvent e )
+	private Texture? ParseEvent( InputEvent e )
 	{
 		string path = ConvertEventToPath( e );
 		if( string.IsNullOrWhiteSpace(path) )
@@ -485,7 +500,7 @@ public partial class ControllerIcons : Node
 			return EPathType.SPECIFIC_PATH;
 	}
 
-	public InputEvent GetMatchingEvent( string path, EInputType inputType = EInputType.NONE, long controller = int.MinValue )
+	public InputEvent? GetMatchingEvent( string path, EInputType inputType = EInputType.NONE, long controller = int.MinValue )
 	{
 		if( inputType == EInputType.NONE )
 		{
@@ -498,7 +513,7 @@ public partial class ControllerIcons : Node
 		}
 
 		Godot.Collections.Array<InputEvent> events;
-		if( CustomInputActions.TryGetValue(path, out Godot.Collections.Array<InputEvent> value) )
+		if( CustomInputActions.TryGetValue(path, out Godot.Collections.Array<InputEvent>? value) && value is not null )
 			events = value;
 		else
 			events = InputMap.ActionGetEvents(path);
@@ -561,7 +576,7 @@ public partial class ControllerIcons : Node
 		switch( (EPathType)GetPathType(path) )
 		{
 			case EPathType.INPUT_ACTION:
-				InputEvent e = GetMatchingEvent(path, inputType, controller);
+				InputEvent? e = GetMatchingEvent(path, inputType, controller);
 				if( e != null)
 					return ConvertEventToPath(e, controller, forceControllerIconStyle);
 				return path;

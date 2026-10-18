@@ -1,3 +1,4 @@
+#nullable enable
 #if TOOLS
 using Godot;
 using System;
@@ -7,8 +8,8 @@ using static ControllerIcons;
 [Tool]
 public partial class ControllerIconPathEditorProperty : EditorProperty
 {
-	private ControllerIconPathSelectorPopup selector;
-	private LineEdit line_edit;
+	private ControllerIconPathSelectorPopup? selector;
+	private LineEdit? line_edit;
 
 	public ControllerIconPathEditorProperty()
 	{
@@ -68,12 +69,18 @@ public partial class ControllerIconPathEditorProperty : EditorProperty
 
 	private void OnButtonPressed()
 	{
+		if (selector is null)
+			return;
+
 		selector.Populate();
 		selector.PopupCentered();
 	}
 
 	public override void _UpdateProperty()
 	{
+		if (line_edit is null)
+			return;
+
 		string new_text = (string)GetEditedObject().Get(GetEditedProperty());
 		if( line_edit.Text != new_text )
 			line_edit.Text = new_text;

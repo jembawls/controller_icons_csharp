@@ -1,3 +1,4 @@
+#nullable enable
 using Godot;
 using System;
 
@@ -53,7 +54,7 @@ public partial class ControllerSettings : Resource
 
 	// Custom generic joystick mapper script
 	[Export]
-	private Script custom_mapper;
+	private Script? custom_mapper;
 
 	// Custom icon file extension
 	[Export]
@@ -64,5 +65,5 @@ public partial class ControllerSettings : Resource
 
 	// Custom LabelSettings. If unset, uses engine default settings.
 	[Export]
-	public LabelSettings custom_label_settings;
+	public LabelSettings? custom_label_settings;
 }

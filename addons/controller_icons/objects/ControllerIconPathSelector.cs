@@ -1,3 +1,4 @@
+#nullable enable
 #if TOOLS
 using Godot;
 using System;
@@ -8,16 +9,16 @@ public partial class ControllerIconPathSelector : PanelContainer
 	[Signal]
 	public delegate void PathSelectedEventHandler(string path);
 
-	private TabContainer nTabContainer;
-	private InputActionSelector nInputAction;
-	private JoypadPathSelector nJoypadPath;
-	private SpecificPathSelector nSpecificPath;
+	private TabContainer? nTabContainer;
+	private InputActionSelector? nInputAction;
+	private JoypadPathSelector? nJoypadPath;
+	private SpecificPathSelector? nSpecificPath;
 
 	private bool InputActionPopulated = false;
 	private bool JoypadPathPopulated = false;
 	private bool SpecificPathPopulated = false; 
 
-	public EditorInterface EditorInterface;
+	public EditorInterface? EditorInterface;
 
 	public override void _Ready()
 	{
@@ -37,11 +38,18 @@ public partial class ControllerIconPathSelector : PanelContainer
 		InputActionPopulated = false;
 		JoypadPathPopulated = false;
 		SpecificPathPopulated = false;
+
+		if (nTabContainer is null)
+			return;
+
 		nTabContainer.CurrentTab = 0;
 	}
 
 	public string GetIconPath()
 	{
+		if (nTabContainer is null)
+			return "";
+
 		if( nTabContainer.GetCurrentTabControl() is InputActionSelector ia )
 		{
 			return ia.GetIconPath();
@@ -65,7 +73,7 @@ public partial class ControllerIconPathSelector : PanelContainer
 		// then this signal may get called even before _Ready() is called
 		// Therefore we need to check that stuff has been setup first.
 		// Ideally: Don't touch the tab container.
-		if( nTabContainer == null || EditorInterface == null ) return;
+		if( nTabContainer == null || nInputAction == null || nJoypadPath == null || nSpecificPath == null || EditorInterface == null ) return;
 
 		if( nTabContainer.GetCurrentTabControl() == nInputAction )
 		{
@@ -97,11 +105,15 @@ public partial class ControllerIconPathSelector : PanelContainer
 		}
 
 		await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-		(nTabContainer.GetCurrentTabControl() as SelectorPanel).GrabFocus();
+		if( nTabContainer.GetCurrentTabControl() is SelectorPanel panel )
+			panel.GrabFocus();
 	}
 
 	private void OnInputActionDone()
 	{
+		if( nInputAction == null )
+			return;
+
 	#if GODOT4_4_OR_GREATER
 		EmitSignalPathSelected(nInputAction.GetIconPath());
 	#else
@@ -111,6 +123,9 @@ public partial class ControllerIconPathSelector : PanelContainer
 
 	private void OnJoypadPathDone()
 	{
+		if( nJoypadPath == null )
+			return;
+
 	#if GODOT4_4_OR_GREATER
 		EmitSignalPathSelected(nJoypadPath.GetIconPath());
 	#else
@@ -120,6 +135,9 @@ public partial class ControllerIconPathSelector : PanelContainer
 
 	private void OnSpecificPathDone()
 	{
+		if( nSpecificPath == null )
+			return;
+
 	#if GODOT4_4_OR_GREATER
 		EmitSignalPathSelected(nSpecificPath.GetIconPath());
 	#else
@@ -134,7 +152,7 @@ public partial class ControllerIconPathSelector : PanelContainer
 		//play nicer with hotreloading.
 		//this means signals need to be re-hooked up if necessary when opened
 		//in OnTabContainerTabSelected.
-		nSpecificPath.CleanupSignals();
+		nSpecificPath?.CleanupSignals();
 	}
 }
 #endif

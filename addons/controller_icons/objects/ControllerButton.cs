@@ -1,3 +1,4 @@
+#nullable enable
 // Controller icon for Button nodes.
 //
 // [b]Deprecated[/b]: Use the new [ControllerIconTexture] texture resource and set it
@@ -15,13 +16,13 @@ public partial class ControllerButton : Button
 {
 	public override string[] _GetConfigurationWarnings()
 	{
-		return new string[]{ "This node is deprecated, and will be removed in a future version.\n\nRemove this script and use the new ControllerIconTexture resource\nby setting it directly in Button's icon property." };
+		return new string[] { "This node is deprecated, and will be removed in a future version.\n\nRemove this script and use the new ControllerIconTexture resource\nby setting it directly in Button's icon property." };
 	}	
 
 	[Export]
 	public string path
 	{
-		get { return _path; }
+		get => _path;
 		set
 		{
 			_path = value;
@@ -36,10 +37,7 @@ public partial class ControllerButton : Button
 
 	[Export]
 	public EShowMode show_only {
-		get 
-		{
-			return _show_only;
-		}
+		get => _show_only;
 
 		set
 		{
@@ -54,10 +52,7 @@ public partial class ControllerButton : Button
 	[Export]
 	public EInputType force_type
 	{
-		get
-		{
-			return _force_type;
-		}
+		get => _force_type;
 
 		set
 		{

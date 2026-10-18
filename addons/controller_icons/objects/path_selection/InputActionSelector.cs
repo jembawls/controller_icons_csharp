@@ -1,3 +1,4 @@
+#nullable enable
 #if TOOLS
 using Godot;
 using System;
@@ -10,11 +11,12 @@ public partial class InputActionSelector : SelectorPanel
 	[Signal]
 	public delegate void DoneEventHandler();
 
-	private LineEdit nNameFilter;
-	private CheckButton nBuiltInActionButton;
-	private Tree nTree;
 
-	private TreeItem root;
+	private LineEdit? nNameFilter;
+	private CheckButton? nBuiltInActionButton;
+	private Tree? nTree;
+
+	private TreeItem? root;
 	private List<ControllerIcons_Item> items = new();
 
 	public override void _Ready()
@@ -33,7 +35,7 @@ public partial class InputActionSelector : SelectorPanel
 
 		public bool ShowDefault
 		{
-			get { return _ShowDefault; }
+			get => _ShowDefault;
 			set
 			{
 				_ShowDefault = value;
@@ -45,7 +47,7 @@ public partial class InputActionSelector : SelectorPanel
 		
 		public bool Filtered
 		{
-			get { return _Filtered; }
+			get => _Filtered;
 			set
 			{
 				_Filtered = value;
@@ -91,6 +93,9 @@ public partial class InputActionSelector : SelectorPanel
 
 	public void Populate( EditorInterface editor_interface )
 	{
+		if( nTree is null || nNameFilter is null || nBuiltInActionButton is null )
+			return;
+
 		// Clear
 		nTree.Clear();
 
@@ -131,6 +136,9 @@ public partial class InputActionSelector : SelectorPanel
 
 	public string GetIconPath()
 	{
+		if( nTree is null )
+			return "";
+
 		TreeItem item = nTree.GetSelected();
 		if( IsInstanceValid(item) )
 			return item.GetText(0);
@@ -151,7 +159,7 @@ public partial class InputActionSelector : SelectorPanel
 
 	public override void GrabFocus()
 	{
-		nNameFilter.GrabFocus();
+		nNameFilter?.GrabFocus();
 	}
 
 	private void OnBuiltInActionButtonToggled( bool toggled_on )
